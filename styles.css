@@ -126,7 +126,36 @@ header {
   perspective: 1500px;
   padding: 10px 0;
   min-height: 0;
+  position: relative;
 }
+
+.side-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 3;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+.side-arrow:active {
+  transform: translateY(-50%) scale(0.94);
+  background: rgba(184,146,61,0.18);
+}
+.side-arrow.side-prev { left: -72px; }
+.side-arrow.side-next { right: -72px; }
 
 .card {
   width: 100%;
@@ -393,3 +422,8 @@ button:active { transform: scale(0.96); }
 .card.enter { animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .card.exit { animation: cardExit 0.2s cubic-bezier(0.4, 0, 1, 1) both; pointer-events: none; }
 .card.exit.flipped { animation: cardExitFlipped 0.2s cubic-bezier(0.4, 0, 1, 1) both; pointer-events: none; }
+
+@media (min-width: 760px) {
+  .app { padding-bottom: 88px; }
+  .side-arrow { display: flex; }
+}

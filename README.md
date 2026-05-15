@@ -12,7 +12,8 @@ The exact romanization system follows the L2 whiteboard set conventions (c, ɯ, 
 - **Anatomical highlight.** Each English prompt is paired with a glowing dot/ring on a stick-figure SVG pointing to the body part in question.
 - **Smooth flip & slide transitions.** Card flips on a 3D Y-axis; NEXT slides the old card out and glides the new one in from the right.
 - **Dark / light theme.** Subtle warm-cream palette by day, deep-warm dark by night. Respects `prefers-color-scheme` on first load and persists your choice in `localStorage`.
-- **Keyboard support.** `Space` / `Enter` to flip, `→` or `n` to advance.
+- **Wide-screen side arrows.** On iPad-sized viewports and up (≥760px), prev / next arrows appear on either side of the card for one-tap navigation.
+- **Keyboard support.** `Space` / `Enter` to flip, `→` / `n` to advance, `←` / `p` to go back.
 - **iOS-safe layout.** Bottom padding tuned for iOS 26 Safari's default URL bar so controls stay reachable.
 
 ## Vocabulary

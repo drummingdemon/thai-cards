@@ -58,6 +58,8 @@ const backRom    = document.getElementById('backRom');
 const backEn     = document.getElementById('backEn');
 const nextBtn    = document.getElementById('nextBtn');
 const flipBtn    = document.getElementById('flipBtn');
+const prevBtn    = document.getElementById('prevBtn');
+const sideNextBtn = document.getElementById('sideNextBtn');
 const dirToggle  = document.getElementById('dirToggle');
 const modeLabel  = document.getElementById('modeLabel');
 const themeToggle = document.getElementById('themeToggle');
@@ -70,6 +72,7 @@ let queue = [];
 let index = 0;
 let direction = 'en2th';
 let current = null;
+let pendingStep = 1;
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -161,6 +164,13 @@ function flip() {
 }
 function next() {
   if (card.classList.contains('exit')) return;
+  pendingStep = 1;
+  card.classList.remove('enter');
+  card.classList.add('exit');
+}
+function prev() {
+  if (card.classList.contains('exit')) return;
+  pendingStep = -1;
   card.classList.remove('enter');
   card.classList.add('exit');
 }
@@ -168,12 +178,15 @@ function next() {
 card.addEventListener('click', flip);
 flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
 nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+if (sideNextBtn) sideNextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
 
 card.addEventListener('animationend', (e) => {
   if (e.target !== card) return;
   if (e.animationName === 'cardExit' || e.animationName === 'cardExitFlipped') {
     card.classList.remove('exit');
-    index++;
+    index += pendingStep;
+    if (index < 0) index = queue.length - 1;
     render();
   } else if (e.animationName === 'cardEnter') {
     card.classList.remove('enter');
@@ -203,6 +216,7 @@ themeToggle.addEventListener('click', () => {
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
   if (e.key === 'ArrowRight' || e.key === 'n') { next(); }
+  if (e.key === 'ArrowLeft' || e.key === 'p') { prev(); }
 });
 
 reshuffle();
