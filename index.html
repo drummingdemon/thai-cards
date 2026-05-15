@@ -3,9 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#F2E8D0">
+<meta name="theme-color" content="#F2E8D0" id="metaThemeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>อวัยวะ — Body Parts L2</title>
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('theme');
+      var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var m = document.getElementById('metaThemeColor');
+        if (m) m.setAttribute('content', '#181410');
+      }
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Noto+Serif+Thai:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -19,6 +32,25 @@
     --gold: #B8923D;
     --card: #FBF6E8;
     --card-shadow: rgba(26, 20, 16, 0.18);
+    --rule: rgba(26,20,16,0.15);
+    --rule-soft: rgba(26,20,16,0.1);
+    --rule-strong: rgba(26,20,16,0.22);
+    --card-highlight: rgba(255,255,255,0.7);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #181410;
+    --ink: #F2E8D0;
+    --ink-soft: #B5A689;
+    --accent: #E5704C;
+    --accent-2: #7AB8A4;
+    --gold: #D4AF5C;
+    --card: #251E18;
+    --card-shadow: rgba(0, 0, 0, 0.55);
+    --rule: rgba(242,232,208,0.13);
+    --rule-soft: rgba(242,232,208,0.08);
+    --rule-strong: rgba(242,232,208,0.22);
+    --card-highlight: rgba(255,255,255,0.04);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -42,6 +74,12 @@
     min-height: 100vh;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     user-select: none; -webkit-user-select: none;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+
+  :root[data-theme="dark"] body::before {
+    opacity: 0.12;
+    mix-blend-mode: overlay;
   }
 
   body::before {
@@ -71,7 +109,7 @@
     align-items: flex-end;
     justify-content: space-between;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(26,20,16,0.15);
+    border-bottom: 1px solid var(--rule);
     margin-bottom: 4px;
   }
 
@@ -134,13 +172,14 @@
     background: var(--card);
     border-radius: 14px;
     box-shadow:
-      0 1px 0 rgba(255,255,255,0.7) inset,
+      0 1px 0 var(--card-highlight) inset,
       0 24px 40px -16px var(--card-shadow),
-      0 2px 6px rgba(26,20,16,0.08);
+      0 2px 6px var(--card-shadow);
     padding: 18px 18px 22px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: background-color 0.35s ease, box-shadow 0.35s ease;
   }
   .face.back {
     transform: rotateY(180deg);
@@ -324,7 +363,7 @@
   .btn-flip {
     background: transparent;
     color: var(--ink);
-    border: 1.5px solid rgba(26,20,16,0.22);
+    border: 1.5px solid var(--rule-strong);
     width: 56px; padding: 0;
     font-size: 18px;
   }
@@ -332,7 +371,7 @@
 
   footer {
     padding-top: 10px;
-    border-top: 1px solid rgba(26,20,16,0.1);
+    border-top: 1px solid var(--rule-soft);
     margin-top: 10px;
     display: flex;
     align-items: center;
@@ -342,9 +381,9 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--ink-soft);
-    opacity: 0.75;
+    opacity: 0.85;
   }
-  .direction-toggle {
+  .direction-toggle, .theme-toggle {
     display: flex; align-items: center; gap: 6px;
     cursor: pointer;
     padding: 4px 6px; margin: -4px -6px;
@@ -352,6 +391,17 @@
   }
   .direction-toggle:active { background: rgba(31,74,63,0.1); }
   .direction-toggle .mode { color: var(--accent-2); font-weight: 500; }
+  .theme-toggle:active { background: rgba(184,146,61,0.18); }
+  .theme-toggle .theme-icon {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, var(--ink) 50%, transparent 50%);
+    border: 1px solid var(--ink-soft);
+    transition: transform 0.35s ease;
+  }
+  :root[data-theme="dark"] .theme-toggle .theme-icon { transform: rotate(180deg); }
+  .theme-toggle .label { color: var(--gold); font-weight: 500; }
 
   @keyframes cardEnter {
     0%   { opacity: 0; transform: translateX(44px); }
@@ -473,7 +523,10 @@
     </div>
 
     <footer>
-      <span>Tap card • reveal</span>
+      <span class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle theme">
+        <span class="theme-icon" aria-hidden="true"></span>
+        <span class="label" id="themeLabel">Light</span>
+      </span>
       <span class="direction-toggle" id="dirToggle">Mode: <span class="mode" id="modeLabel">EN → TH</span></span>
     </footer>
   </div>
@@ -542,6 +595,9 @@
   const flipBtn    = document.getElementById('flipBtn');
   const dirToggle  = document.getElementById('dirToggle');
   const modeLabel  = document.getElementById('modeLabel');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeLabel  = document.getElementById('themeLabel');
+  const metaThemeColor = document.getElementById('metaThemeColor');
   const ring       = document.querySelector('#highlight .ring');
   const dot        = document.querySelector('#highlight .dot');
 
@@ -665,6 +721,18 @@
     current = null;
     reshuffle();
     render();
+  });
+
+  function applyTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
+    themeLabel.textContent = mode === 'dark' ? 'Dark' : 'Light';
+    if (metaThemeColor) metaThemeColor.setAttribute('content', mode === 'dark' ? '#181410' : '#F2E8D0');
+    try { localStorage.setItem('theme', mode); } catch (e) {}
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
   });
 
   window.addEventListener('keydown', (e) => {
