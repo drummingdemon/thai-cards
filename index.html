@@ -629,6 +629,12 @@
   flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
   nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 
+  card.addEventListener('animationend', (e) => {
+    if (e.target === card && (e.animationName === 'enter' || e.animationName === 'enterFlipped')) {
+      card.classList.remove('enter');
+    }
+  });
+
   dirToggle.addEventListener('click', () => {
     direction = direction === 'en2th' ? 'th2en' : 'en2th';
     modeLabel.textContent = direction === 'en2th' ? 'EN → TH' : 'TH → EN';
