@@ -403,20 +403,21 @@
   .theme-toggle .label { color: var(--gold); font-weight: 500; }
 
   @keyframes cardEnter {
-    0%   { opacity: 0; transform: translateX(44px); }
+    0%   { opacity: 0; transform: translateX(28px); }
+    40%  { opacity: 1; }
     100% { opacity: 1; transform: translateX(0); }
   }
   @keyframes cardExit {
     0%   { opacity: 1; transform: translateX(0); }
-    100% { opacity: 0; transform: translateX(-44px); }
+    100% { opacity: 0; transform: translateX(-20px); }
   }
   @keyframes cardExitFlipped {
     0%   { opacity: 1; transform: translateX(0) rotateY(180deg); }
-    100% { opacity: 0; transform: translateX(-44px) rotateY(180deg); }
+    100% { opacity: 0; transform: translateX(-20px) rotateY(180deg); }
   }
-  .card.enter { animation: cardEnter 0.32s cubic-bezier(0.2, 0, 0, 1) both; }
-  .card.exit { animation: cardExit 0.22s cubic-bezier(0.5, 0, 1, 1) both; pointer-events: none; }
-  .card.exit.flipped { animation: cardExitFlipped 0.22s cubic-bezier(0.5, 0, 1, 1) both; pointer-events: none; }
+  .card.enter { animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .card.exit { animation: cardExit 0.2s cubic-bezier(0.4, 0, 1, 1) both; pointer-events: none; }
+  .card.exit.flipped { animation: cardExitFlipped 0.2s cubic-bezier(0.4, 0, 1, 1) both; pointer-events: none; }
 </style>
 </head>
 <body>
