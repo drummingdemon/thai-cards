@@ -266,10 +266,11 @@
   }
   .word-rom {
     font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(15px, 4vw, 19px);
-    color: var(--ink-soft);
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
+    font-size: clamp(40px, 12vw, 68px);
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
   }
   .word-en-small {
     font-family: 'Fraunces', serif;
@@ -352,10 +353,21 @@
   .direction-toggle:active { background: rgba(31,74,63,0.1); }
   .direction-toggle .mode { color: var(--accent-2); font-weight: 500; }
 
-  @keyframes enter { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
-  @keyframes enterFlipped { 0% { opacity: 0; transform: translateY(8px) rotateY(180deg); } 100% { opacity: 1; transform: translateY(0) rotateY(180deg); } }
-  .card.enter { animation: enter 0.4s ease both; }
-  .card.enter.flipped { animation: enterFlipped 0.4s ease both; }
+  @keyframes cardEnter {
+    0%   { opacity: 0; transform: translateX(44px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes cardExit {
+    0%   { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-44px); }
+  }
+  @keyframes cardExitFlipped {
+    0%   { opacity: 1; transform: translateX(0) rotateY(180deg); }
+    100% { opacity: 0; transform: translateX(-44px) rotateY(180deg); }
+  }
+  .card.enter { animation: cardEnter 0.32s cubic-bezier(0.2, 0, 0, 1) both; }
+  .card.exit { animation: cardExit 0.22s cubic-bezier(0.5, 0, 1, 1) both; pointer-events: none; }
+  .card.exit.flipped { animation: cardExitFlipped 0.22s cubic-bezier(0.5, 0, 1, 1) both; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -622,15 +634,27 @@
     card.classList.add('enter');
   }
 
-  function flip() { card.classList.toggle('flipped'); }
-  function next() { index++; render(); }
+  function flip() {
+    if (card.classList.contains('exit')) return;
+    card.classList.toggle('flipped');
+  }
+  function next() {
+    if (card.classList.contains('exit')) return;
+    card.classList.remove('enter');
+    card.classList.add('exit');
+  }
 
   card.addEventListener('click', flip);
   flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
   nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 
   card.addEventListener('animationend', (e) => {
-    if (e.target === card && (e.animationName === 'enter' || e.animationName === 'enterFlipped')) {
+    if (e.target !== card) return;
+    if (e.animationName === 'cardExit' || e.animationName === 'cardExitFlipped') {
+      card.classList.remove('exit');
+      index++;
+      render();
+    } else if (e.animationName === 'cardEnter') {
       card.classList.remove('enter');
     }
   });
