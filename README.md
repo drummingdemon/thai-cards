@@ -2,15 +2,15 @@
 
 **Live:** https://drummingdemon.github.io/thai-cards/
 
-A single-file, zero-dependency flashcard web app for learning Thai body-part vocabulary. Built around L2 whiteboard set, with the exact romanization system used (c, ɯ, w, y, k…).
+A zero-dependency flashcard web app for learning Thai body-part vocabulary. No build step, no framework, no CDNs at runtime — everything (scripts, styles, fonts) is served from the repo itself.
 
-Open `index.html` in any modern browser — that's the whole thing.
+The exact romanization system follows the L2 whiteboard set conventions (c, ɯ, w, y, k…).
 
 ## Features
 
 - **Two study directions.** Toggle between EN → TH (English prompt, Thai reveal) and TH → EN. In TH-first mode the romanization is shown alongside the Thai so you can build sound recognition before reading.
 - **Anatomical highlight.** Each English prompt is paired with a glowing dot/ring on a stick-figure SVG pointing to the body part in question.
-- **Smooth flip & swipe transitions.** Card flips on a 3D rotateY axis; NEXT slides the old card out and glides the new one in.
+- **Smooth flip & slide transitions.** Card flips on a 3D Y-axis; NEXT slides the old card out and glides the new one in from the right.
 - **Dark / light theme.** Subtle warm-cream palette by day, deep-warm dark by night. Respects `prefers-color-scheme` on first load and persists your choice in `localStorage`.
 - **Keyboard support.** `Space` / `Enter` to flip, `→` or `n` to advance.
 - **iOS-safe layout.** Bottom padding tuned for iOS 26 Safari's default URL bar so controls stay reachable.
@@ -41,14 +41,37 @@ Open `index.html` in any modern browser — that's the whole thing.
 | 20 | knee         | เข่า       | khàw         |
 | 21 | elbow        | ศอก       | sɔ̀ɔk         |
 
-Tone marks above the vowels are: unmarked = mid, à = low, â = falling, á = high, ǎ = rising; macron (ā) marks long mid-tone vowels.
+Tone marks: unmarked = mid, à = low, â = falling, á = high, ǎ = rising; macron (ā) marks a long mid-tone vowel.
 
-## File layout
+## Running it
+
+Open `index.html` directly in any modern browser, or serve the folder with any static-file server, e.g.:
+
+```sh
+python3 -m http.server 8000
+# then visit http://localhost:8000
+```
+
+A static server avoids any `file://` font-loading quirks and matches the deployed GitHub Pages environment.
+
+## Project structure
 
 ```
 thai-cards/
-├── index.html   # everything — HTML, CSS, JS, SVG figure, word list
+├── index.html      # markup (header, card faces, SVG figure, controls)
+├── styles.css      # all styles, including light + dark theme variables
+├── fonts.css       # @font-face declarations pointing at fonts/
+├── app.js          # word list, highlight positions, render + interaction logic
+├── fonts/          # 15 woff2 files (~408K) + OFL license texts
 └── README.md
 ```
 
-No build step, no package manager, no server required. Edit `WORDS` in `index.html` to extend the deck; add a matching entry in `HIGHLIGHTS` to place the anatomical dot.
+Edit `WORDS` in `app.js` to extend the deck; add a matching entry in `HIGHLIGHTS` to place the anatomical dot on the figure.
+
+## Fonts
+
+All three typefaces are self-hosted from `fonts/` and ship under the **SIL Open Font License 1.1**. The full license text plus each font's upstream copyright notice lives alongside the `.woff2` files:
+
+- **Fraunces** — Copyright 2018 The Fraunces Project Authors. See `fonts/Fraunces-OFL.txt`.
+- **Noto Serif Thai** — Copyright 2022 The Noto Project Authors. See `fonts/NotoSerifThai-OFL.txt`.
+- **JetBrains Mono** — Copyright 2020 The JetBrains Mono Project Authors. See `fonts/JetBrainsMono-OFL.txt`.
