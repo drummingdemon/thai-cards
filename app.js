@@ -9,6 +9,7 @@ const backRom    = document.getElementById('backRom');
 const backEn     = document.getElementById('backEn');
 const nextBtn    = document.getElementById('nextBtn');
 const flipBtn    = document.getElementById('flipBtn');
+const backBtn    = document.getElementById('backBtn');
 const prevBtn    = document.getElementById('prevBtn');
 const sideNextBtn = document.getElementById('sideNextBtn');
 const dirToggle  = document.getElementById('dirToggle');
@@ -181,6 +182,7 @@ if (speakBtn) {
   }
 }
 nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+if (backBtn) backBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
 if (sideNextBtn) sideNextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
 

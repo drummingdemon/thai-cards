@@ -3,8 +3,16 @@
 **Live:** https://drummingdemon.github.io/thai-cards/
 
 <p align="center">
-  <img src="screenshots/shot1.png" width="48%" alt="Front of card in dark theme — English prompt with anatomical stick-figure highlight">
-  <img src="screenshots/shot2.png" width="48%" alt="Back of card in light theme — Thai script with speaker button and romanization">
+  <img src="screenshots/shot1l.png" width="48%" alt="Front of card, light theme — English prompt with anatomical stick-figure highlight">
+  <img src="screenshots/shot1d.png" width="48%" alt="Front of card, dark theme — English prompt with anatomical stick-figure highlight">
+</p>
+<p align="center">
+  <img src="screenshots/shot2l.png" width="48%" alt="Back of card, light theme — Thai script with speaker button and romanization">
+  <img src="screenshots/shot2d.png" width="48%" alt="Back of card, dark theme — Thai script with speaker button and romanization">
+</p>
+<p align="center">
+  <img src="screenshots/shot3l.png" width="48%" alt="Word list modal, light theme — alphabetised vocabulary with tap-to-speak rows">
+  <img src="screenshots/shot3d.png" width="48%" alt="Word list modal, dark theme — alphabetised vocabulary with tap-to-speak rows">
 </p>
 
 A zero-dependency flashcard web app for learning Thai body-part vocabulary. No build step, no framework, no CDNs at runtime — scripts, styles, and fonts are all served from the repo itself.
