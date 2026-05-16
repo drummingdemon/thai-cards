@@ -69,6 +69,7 @@ const wordListModal = document.getElementById('wordListModal');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose    = document.getElementById('modalClose');
 const modalList     = document.getElementById('modalList');
+const speakBtn      = document.getElementById('speakBtn');
 const metaThemeColor = document.getElementById('metaThemeColor');
 const ring       = document.querySelector('#highlight .ring');
 const dot        = document.querySelector('#highlight .dot');
@@ -180,8 +181,54 @@ function prev() {
   card.classList.add('exit');
 }
 
+const speechAvailable = 'speechSynthesis' in window;
+let cachedThaiVoice = null;
+function pickThaiVoice() {
+  if (!speechAvailable) return null;
+  const voices = window.speechSynthesis.getVoices();
+  cachedThaiVoice =
+    voices.find(v => v.lang === 'th-TH') ||
+    voices.find(v => v.lang && v.lang.toLowerCase().startsWith('th')) ||
+    null;
+  return cachedThaiVoice;
+}
+if (speechAvailable) {
+  pickThaiVoice();
+  if (typeof speechSynthesis.onvoiceschanged !== 'undefined') {
+    speechSynthesis.addEventListener('voiceschanged', pickThaiVoice);
+  }
+  const hint = document.getElementById('modalHint');
+  if (hint) hint.hidden = false;
+}
+function speakThai(text, btn) {
+  if (!speechAvailable || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'th-TH';
+  u.rate = 0.85;
+  const v = cachedThaiVoice || pickThaiVoice();
+  if (v) u.voice = v;
+  if (btn) {
+    btn.classList.add('speaking');
+    const clear = () => btn.classList.remove('speaking');
+    u.onend = clear;
+    u.onerror = clear;
+  }
+  window.speechSynthesis.speak(u);
+}
+
 card.addEventListener('click', flip);
 flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
+if (speakBtn) {
+  if (!speechAvailable) {
+    speakBtn.style.display = 'none';
+  } else {
+    speakBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (current) speakThai(current.th, speakBtn);
+    });
+  }
+}
 nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 if (sideNextBtn) sideNextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
@@ -227,10 +274,13 @@ function buildWordList() {
   sorted.forEach(w => {
     const row = document.createElement('div');
     row.className = 'word-row';
+    row.setAttribute('role', 'button');
+    row.setAttribute('aria-label', `speak ${w.en} in Thai`);
     const en = document.createElement('span');  en.className = 'en';  en.textContent = w.en;
     const th = document.createElement('span');  th.className = 'th';  th.textContent = w.th;
     const rom = document.createElement('span'); rom.className = 'rom'; rom.textContent = w.rom;
     row.append(en, th, rom);
+    row.addEventListener('click', () => speakThai(w.th));
     frag.appendChild(row);
   });
   modalList.appendChild(frag);
