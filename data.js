@@ -1,0 +1,48 @@
+const WORDS = [
+  { en: "eye",         th: "ตา",       rom: "tāa" },
+  { en: "ear",         th: "หู",       rom: "hǔu" },
+  { en: "mouth",       th: "ปาก",      rom: "pàak" },
+  { en: "nose",        th: "จมูก",     rom: "càmùuk" },
+  { en: "foot",        th: "เท้า",      rom: "tháaw" },
+  { en: "arm",         th: "แขน",      rom: "khɛ̌ɛn" },
+  { en: "leg",         th: "ขา",       rom: "khǎa" },
+  { en: "head",        th: "หัว",      rom: "hǔa" },
+  { en: "eyebrow",     th: "คิ้ว",      rom: "khíw" },
+  { en: "eyelash",     th: "ขนตา",     rom: "khǒntāa" },
+  { en: "tooth",       th: "ฟัน",       rom: "fān" },
+  { en: "tongue",      th: "ลิ้น",      rom: "lín" },
+  { en: "face",        th: "หน้า",     rom: "nâa" },
+  { en: "neck",        th: "คอ",       rom: "khɔ̄ɔ" },
+  { en: "shoulder",    th: "ไหล่",     rom: "lày" },
+  { en: "hand",        th: "มือ",       rom: "mʉ̄ʉ" },
+  { en: "finger",      th: "นิ้วมือ",   rom: "níwmʉ̄ʉ" },
+  { en: "fingernail",  th: "เล็บมือ",   rom: "lépmʉ̄ʉ" },
+  { en: "stomach",     th: "ท้อง",      rom: "thɔ́ɔŋ" },
+  { en: "knee",        th: "เข่า",      rom: "khàw" },
+  { en: "elbow",       th: "ศอก",      rom: "sɔ̀ɔk" }
+];
+
+// Anatomical highlight positions on the figure (viewBox 100 x 145)
+const HIGHLIGHTS = {
+  "eye":        { cx: 45,   cy: 20,    rx: 2,    ry: 1.4 },
+  "ear":        { cx: 38.5, cy: 22.5,  rx: 1.8,  ry: 2.2 },
+  "mouth":      { cx: 50,   cy: 29,    rx: 3.2,  ry: 1.6 },
+  "nose":       { cx: 50,   cy: 24.5,  rx: 1.5,  ry: 2 },
+  "foot":       { cx: 40,   cy: 136,   rx: 7,    ry: 3 },
+  "arm":        { cx: 28,   cy: 60,    rx: 3.5,  ry: 11 },
+  "leg":        { cx: 40,   cy: 110,   rx: 3.5,  ry: 18 },
+  "head":       { cx: 50,   cy: 20,    rx: 12,   ry: 14 },
+  "eyebrow":    { cx: 45,   cy: 16.3,  rx: 2.5,  ry: 1 },
+  "eyelash":    { cx: 45,   cy: 18.7,  rx: 2.5,  ry: 0.8 },
+  "tooth":      { cx: 50,   cy: 29,    rx: 2,    ry: 1.2 },
+  "tongue":     { cx: 50,   cy: 30,    rx: 2,    ry: 1.5 },
+  "face":       { cx: 50,   cy: 23,    rx: 9.5,  ry: 11 },
+  "neck":       { cx: 50,   cy: 36,    rx: 4,    ry: 2.5 },
+  "shoulder":   { cx: 36,   cy: 41.5,  rx: 3,    ry: 2.5 },
+  "hand":       { cx: 24,   cy: 87,    rx: 4,    ry: 5 },
+  "finger":     { cx: 24,   cy: 91.5,  rx: 3,    ry: 2 },
+  "fingernail": { cx: 24,   cy: 93,    rx: 3,    ry: 1 },
+  "stomach":    { cx: 50,   cy: 70,    rx: 8,    ry: 7 },
+  "knee":       { cx: 40,   cy: 110,   rx: 3.5,  ry: 2.5 },
+  "elbow":      { cx: 26,   cy: 64,    rx: 2.5,  ry: 2.5 }
+};

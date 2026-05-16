@@ -75,12 +75,14 @@ thai-cards/
 ├── index.html      # markup: header, card faces, SVG figure, controls, modal
 ├── styles.css      # all styles, including light/dark theme variables
 ├── fonts.css       # @font-face declarations pointing at fonts/
-├── app.js          # word data, render logic, flip/slide transitions, speech
+├── data.js         # WORDS deck and HIGHLIGHTS coordinates
+├── app.js          # render logic, flip/slide transitions, speech, modal
 ├── fonts/          # self-hosted .woff2 files plus OFL license texts
+├── screenshots/    # README preview images
 └── README.md
 ```
 
-To extend the deck, add an entry to `WORDS` in `app.js`. If the new word maps to a body part, add a matching entry in `HIGHLIGHTS` to position its highlight on the figure.
+To extend the deck, add an entry to `WORDS` in `data.js`. If the new word maps to a body part, add a matching entry in `HIGHLIGHTS` to position its highlight on the figure (coordinates are in the figure's `viewBox` of 100 × 145).
 
 ## Fonts
 
