@@ -64,6 +64,11 @@ const dirToggle  = document.getElementById('dirToggle');
 const modeLabel  = document.getElementById('modeLabel');
 const themeToggle = document.getElementById('themeToggle');
 const themeLabel  = document.getElementById('themeLabel');
+const listBtn       = document.getElementById('listBtn');
+const wordListModal = document.getElementById('wordListModal');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalClose    = document.getElementById('modalClose');
+const modalList     = document.getElementById('modalList');
 const metaThemeColor = document.getElementById('metaThemeColor');
 const ring       = document.querySelector('#highlight .ring');
 const dot        = document.querySelector('#highlight .dot');
@@ -215,7 +220,39 @@ themeToggle.addEventListener('click', () => {
   applyTheme(current === 'dark' ? 'light' : 'dark');
 });
 
+function buildWordList() {
+  modalList.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  const sorted = WORDS.slice().sort((a, b) => a.en.localeCompare(b.en));
+  sorted.forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    const en = document.createElement('span');  en.className = 'en';  en.textContent = w.en;
+    const th = document.createElement('span');  th.className = 'th';  th.textContent = w.th;
+    const rom = document.createElement('span'); rom.className = 'rom'; rom.textContent = w.rom;
+    row.append(en, th, rom);
+    frag.appendChild(row);
+  });
+  modalList.appendChild(frag);
+}
+function openWordList() {
+  buildWordList();
+  wordListModal.classList.add('open');
+  wordListModal.setAttribute('aria-hidden', 'false');
+}
+function closeWordList() {
+  wordListModal.classList.remove('open');
+  wordListModal.setAttribute('aria-hidden', 'true');
+}
+function isModalOpen() { return wordListModal.classList.contains('open'); }
+
+listBtn.addEventListener('click', (e) => { e.stopPropagation(); openWordList(); });
+modalClose.addEventListener('click', closeWordList);
+modalBackdrop.addEventListener('click', closeWordList);
+
 window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isModalOpen()) { closeWordList(); return; }
+  if (isModalOpen()) return;
   if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
   if (e.key === 'ArrowRight' || e.key === 'n') { next(); }
   if (e.key === 'ArrowLeft' || e.key === 'p') { prev(); }

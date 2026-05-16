@@ -377,6 +377,19 @@ button:active { transform: scale(0.96); }
 }
 .btn-flip:active { background: rgba(184,146,61,0.18); }
 
+.btn-list {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--rule-strong);
+  padding: 0 14px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-list span:first-child { font-size: 14px; line-height: 1; }
+.btn-list:active { background: rgba(184,146,61,0.18); }
+
 .top-controls {
   display: flex;
   align-items: center;
@@ -421,6 +434,139 @@ button:active { transform: scale(0.96); }
 }
 .card.enter { animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .card.exit { animation: cardExit 0.2s cubic-bezier(0.4, 0, 1, 1) both; pointer-events: none; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+.modal.open { display: flex; animation: modalFade 0.18s ease both; }
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,20,16,0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+:root[data-theme="dark"] .modal-backdrop { background: rgba(0,0,0,0.65); }
+.modal-content {
+  position: relative;
+  background: var(--card);
+  border-radius: 14px;
+  max-width: 460px;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 1px 0 var(--card-highlight) inset,
+    0 24px 60px -8px var(--card-shadow),
+    0 4px 12px var(--card-shadow);
+  overflow: hidden;
+  animation: modalRise 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.modal-content::before, .modal-content::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--gold);
+  opacity: 0.65;
+  pointer-events: none;
+}
+.modal-content::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.modal-content::after  { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--rule);
+  flex-shrink: 0;
+}
+.modal-title {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.modal-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.modal-close {
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.modal-close:active { background: rgba(184,146,61,0.18); }
+
+.modal-list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 22px 18px;
+  flex: 1;
+  min-height: 0;
+}
+.word-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  gap: 12px;
+}
+.word-row:last-child { border-bottom: none; }
+.word-row .en {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--ink);
+}
+.word-row .th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 20px;
+  text-align: center;
+  line-height: 1.1;
+}
+.word-row .rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 @media (min-width: 760px) {
   .app { padding-bottom: 88px; }

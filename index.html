@@ -131,12 +131,27 @@
 
     <div class="controls">
       <button class="btn-flip" id="flipBtn" aria-label="flip card">↻</button>
+      <button class="btn-list" id="listBtn" aria-label="show word list">
+        <span aria-hidden="true">☰</span>
+        <span>Word List</span>
+      </button>
       <button class="btn-next" id="nextBtn">
         <span>Next</span>
         <span>→</span>
       </button>
     </div>
 
+  </div>
+
+  <div class="modal" id="wordListModal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">อวัยวะ <span class="modal-subtitle">All Words</span></span>
+        <button class="modal-close" id="modalClose" aria-label="close">×</button>
+      </div>
+      <div class="modal-list" id="modalList"></div>
+    </div>
   </div>
 
 </body>
