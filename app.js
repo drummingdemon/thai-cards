@@ -183,13 +183,15 @@ if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); pre
 
 card.addEventListener('animationend', (e) => {
   if (e.target !== card) return;
-  if (e.animationName === 'cardExit' || e.animationName === 'cardExitFlipped') {
+  if (e.animationName === 'cardExit') {
+    card.classList.add('no-transition');
     card.classList.remove('exit');
     index += pendingStep;
     if (index < 0) index = queue.length - 1;
     render();
   } else if (e.animationName === 'cardEnter') {
     card.classList.remove('enter');
+    card.classList.remove('no-transition');
   }
 });
 
