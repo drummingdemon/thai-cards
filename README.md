@@ -154,7 +154,7 @@ thai-cards/
 
 ## Artwork
 
-The zodiac watermarks on the Months deck and the deck-signature marks on the home screen are silhouettes from [game-icons.net](https://game-icons.net) by **Lorc**, used under the [Creative Commons Attribution 3.0 Unported](https://creativecommons.org/licenses/by/3.0/) licence. Each entry in `data/zodiac-motifs.js` carries a single-path SVG with `fill="currentColor"` so theme + opacity stay CSS-controlled (watermark renders dark in light theme, gold in dark theme, both at ~10% opacity).
+The zodiac watermarks on the Months deck (per-card per-month signs) and the months home-tile mark are from [Material Design Icons](https://materialdesignicons.com/) (`zodiac-*`, `calendar-clock`), licensed [Apache 2.0](https://github.com/Templarian/MaterialDesign/blob/master/LICENSE). The body-parts home-tile mark is a small hand-drawn standing figure. Each entry in `data/zodiac-motifs.js` carries a single-path SVG with `fill="currentColor"` so theme + opacity stay CSS-controlled (watermark renders dark in light theme, gold in dark theme, both at ~10% opacity).
 
 ## Fonts
 
