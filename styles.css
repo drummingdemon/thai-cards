@@ -342,22 +342,14 @@ body::before {
   justify-content: space-between;
 }
 
-/* Title block centred vertically + horizontally on the card; the motif lives
-   in the lower-right corner behind it (low opacity, so the text dominates).
-   The explicit z-index lifts the child into its own stacking context — which
-   in 3D-transformed parents (the card flip) breaks out of the parent's
-   backface culling. Re-applying backface-visibility: hidden + a translateZ
-   pins it back inside the face's 3D layer so it disappears on flip-away. */
-.face.front.face-months .month-front,
-.face.back.face-months .month-back,
-.face.face-months .motif-wrap {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-}
+/* Title block centred vertically + horizontally on the card.
+   No explicit z-index on the text — z-indexed children of a backface-hidden
+   element get promoted to their own compositor layer in WebKit and survive
+   the parent's flip, rendering mirrored over the back face. Instead, give
+   the face its own stacking context (via `isolation: isolate`, below) and
+   push the motif to z-index:-1 — it sits safely beneath the text in DOM
+   order without anything escaping the face. */
 .face.front.face-months .month-front {
-  position: relative;
-  z-index: 2;
   margin: auto 0;
   padding: 0;
   text-align: center;
@@ -406,10 +398,10 @@ body::before {
   margin-top: 8px;
 }
 
-/* Back face — Thai-first stack, then meta, then zodiac line. */
+/* Back face — Thai-first stack, then meta, then zodiac line. Same isolation
+   strategy as the front: no explicit z-index, layering via `isolation:isolate`
+   on the parent face + the motif's negative z-index. */
 .month-back {
-  position: relative;
-  z-index: 2;
   text-align: center;
   margin: auto 0;
   padding: 0 4px;
@@ -506,7 +498,10 @@ body::before {
 .motif-wrap {
   position: absolute;
   pointer-events: none;
-  z-index: 1;
+  /* Negative z-index — within the face's own stacking context (set up by
+     `isolation: isolate` on `.face.face-months`) this puts the motif behind
+     all in-flow children (text) without escaping the face's backface cull. */
+  z-index: -1;
   /* Anchor to lower-right; bleed gently off both edges per spec. */
   bottom: -8%;
   right: -8%;
@@ -549,12 +544,20 @@ body::before {
   height: 100%;
 }
 
-/* Make sure card faces clip the motif rather than letting it bleed beyond,
-   and that the gold corner brackets sit on top of the motif (per spec — the
-   bottom-right bracket frames the corner the creature emerges from). */
-.face.face-months { overflow: hidden; position: absolute; }
+/* Card faces clip the motif rather than letting it bleed beyond. The
+   `isolation: isolate` gives the face its OWN stacking context, which is
+   what lets `.motif-wrap { z-index: -1 }` stay behind in-flow text without
+   bleeding behind the card body itself. Crucially, isolating here also
+   keeps the face's children flattened inside the face's 3D plane, so
+   `backface-visibility: hidden` (set on `.face`) hides the whole face
+   cleanly on flip — no z-indexed child escapes the parent's cull. */
+.face.face-months {
+  overflow: hidden;
+  position: absolute;
+  isolation: isolate;
+}
 .face.face-months::before,
-.face.face-months::after { z-index: 3; }
+.face.face-months::after { z-index: 1; }
 
 /* Modal banner — the "Thai months = zodiac signs" learning framing. */
 .modal-banner {
