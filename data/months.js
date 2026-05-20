@@ -39,7 +39,7 @@ const MONTHS = [
       note: "mesha = ram. Songkran sits here — sun enters Aries." }
   },
   {
-    num: 5,  numThai: "๕",  en: "May",       th: "พฤษภาคม",       rom: "phrútsaphāakhōm",
+    num: 5,  numThai: "๕",  en: "May",       th: "พฤษภาคม",       rom: "phrʉ́tsaphāakhōm",
     days: 31, ending: "-khom",
     zodiac: { sign: "Taurus",      glyph: "♉", root: "vrishabha",  rootThai: "พฤษภ",
       creature: "bull",
@@ -81,7 +81,7 @@ const MONTHS = [
       note: "tula = balance." }
   },
   {
-    num: 11, numThai: "๑๑", en: "November",  th: "พฤศจิกายน",     rom: "phrútsacìkāayōn",
+    num: 11, numThai: "๑๑", en: "November",  th: "พฤศจิกายน",     rom: "phrʉ́tsacìkāayōn",
     days: 30, ending: "-yon",
     zodiac: { sign: "Scorpio",     glyph: "♏", root: "vrishchika", rootThai: "พฤศจิก",
       creature: "scorpion",

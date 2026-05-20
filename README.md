@@ -71,13 +71,13 @@ Each card surfaces the zodiac creature + root etymology on the back so the conne
 | 02 | February  | กุมภาพันธ์   | kūmphāaphān         | 28   | -phan  | Aquarius    | กุมภ์ / kumbha — water pot |
 | 03 | March     | มีนาคม      | mīināakhōm          | 31   | -khom  | Pisces      | มีน / mina — fish |
 | 04 | April     | เมษายน      | mēesǎayōn           | 30   | -yon   | Aries       | เมษ / mesha — ram |
-| 05 | May       | พฤษภาคม     | phrútsaphāakhōm     | 31   | -khom  | Taurus      | พฤษภ / vrishabha — bull |
+| 05 | May       | พฤษภาคม     | phrʉ́tsaphāakhōm     | 31   | -khom  | Taurus      | พฤษภ / vrishabha — bull |
 | 06 | June      | มิถุนายน     | míthùnāayōn         | 30   | -yon   | Gemini      | มิถุน / mithuna — twins |
 | 07 | July      | กรกฎาคม     | karákadāakhōm       | 31   | -khom  | Cancer      | กรกฎ / karkata — crab |
 | 08 | August    | สิงหาคม      | sǐŋhǎakhōm          | 31   | -khom  | Leo         | สิงห์ / singha — lion |
 | 09 | September | กันยายน      | kānyāayōn           | 30   | -yon   | Virgo       | กันย์ / kanya — maiden |
 | 10 | October   | ตุลาคม       | tùlāakhōm           | 31   | -khom  | Libra       | ตุล / tula — scales |
-| 11 | November  | พฤศจิกายน   | phrútsacìkāayōn     | 30   | -yon   | Scorpio     | พฤศจิก / vrishchika — scorpion |
+| 11 | November  | พฤศจิกายน   | phrʉ́tsacìkāayōn     | 30   | -yon   | Scorpio     | พฤศจิก / vrishchika — scorpion |
 | 12 | December  | ธันวาคม      | thānwāakhōm         | 31   | -khom  | Sagittarius | ธนู / dhanu — bow |
 
 > Romanisations transcribed verbatim from the school book (Bangkok edition, Mahatun Plaza). Joined-syllable form with tone marks; `ŋ` denotes the velar nasal in สิงหาคม.
