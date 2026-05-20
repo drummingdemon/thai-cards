@@ -81,6 +81,546 @@ body::before {
   width: 100%;
 }
 
+/* The app shell hosts two top-level views; toggle by `data-view` rather than
+   adding/removing markup, so the existing deck DOM stays mounted and keeps
+   its state across home ⇄ deck transitions. */
+.app[data-view="home"] .deck-view { display: none; }
+.app[data-view="deck"] .home      { display: none; }
+
+.deck-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   HOME SCREEN — deck selector
+   ============================================================ */
+.home {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.home-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+}
+.home-title { display: flex; flex-direction: column; gap: 2px; }
+.home-title .thai {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.home-title .en {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.home-decks {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  justify-content: center;
+  padding: 6px 0;
+}
+.home-deck {
+  position: relative;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px 28px 26px;
+  min-height: 168px;
+  cursor: pointer;
+  box-shadow:
+    0 1px 0 var(--card-highlight) inset,
+    0 18px 34px -14px var(--card-shadow),
+    0 2px 6px var(--card-shadow);
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+.home-deck::before, .home-deck::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--gold);
+  opacity: 0.65;
+  pointer-events: none;
+}
+.home-deck::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.home-deck::after  { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+.home-deck:active {
+  transform: scale(0.98);
+  box-shadow:
+    0 1px 0 var(--card-highlight) inset,
+    0 8px 18px -10px var(--card-shadow),
+    0 2px 4px var(--card-shadow);
+}
+.home-deck .home-deck-thai {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 800;
+  font-size: clamp(44px, 11vw, 58px);
+  line-height: 1.05;
+  color: var(--accent);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 2;
+}
+.home-deck .home-deck-en {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: clamp(26px, 6.5vw, 32px);
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 2;
+}
+.home-deck .home-deck-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  position: relative;
+  z-index: 2;
+}
+.home-deck .home-deck-count { font-weight: 500; color: var(--ink); }
+.home-deck .home-deck-modes {
+  opacity: 0.7;
+  padding-left: 12px;
+  border-left: 1px solid var(--rule);
+}
+
+/* Subtle deck-signature watermark in the lower-right of each tile, same
+   spirit as the per-card motif but tinier. body-parts uses a stylised figure
+   silhouette mark; months uses a zodiac wheel mark. */
+.home-deck::before, .home-deck::after { z-index: 3; }
+.home-deck .home-deck-mark {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 55%;
+  height: 120%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.06;
+  color: var(--ink);
+}
+:root[data-theme="dark"] .home-deck .home-deck-mark {
+  opacity: 0.09;
+  color: var(--gold);
+}
+.home-deck .home-deck-mark svg {
+  width: 100%; height: 100%;
+}
+
+.home-footer-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  text-align: center;
+  margin: 8px 0 0;
+}
+
+/* ============================================================
+   DECK HEADER — back-home arrow alongside title
+   ============================================================ */
+.btn-home {
+  background: transparent;
+  border: 1.5px solid var(--rule-strong);
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  line-height: 1;
+  width: 38px; height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  margin-right: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+.btn-home:active { background: rgba(184,146,61,0.18); transform: scale(0.94); }
+
+.deck-view header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+}
+.deck-view header .title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.deck-view header .counter { margin-left: auto; }
+
+/* ============================================================
+   MODE SELECTOR — segmented control for months
+   ============================================================ */
+.mode-selector {
+  display: flex;
+  gap: 0;
+  margin: 10px 0 2px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  padding: 2px;
+  background: rgba(184,146,61,0.06);
+}
+.mode-selector[hidden] { display: none; }
+.mode-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 9px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.mode-btn:hover { color: var(--ink); }
+.mode-btn[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 500;
+}
+.mode-btn:active { transform: scale(0.97); }
+
+/* ============================================================
+   MONTHS CARD LAYOUT
+   ============================================================ */
+/* Hide the other deck's faces — they stay mounted but inert. */
+.card-stage[data-deck="body-parts"] .face-months    { display: none; }
+.card-stage[data-deck="months"]     .face-body-parts { display: none; }
+
+/* Direction toggle is body-parts only (months always EN → TH-on-reveal). */
+.card-stage[data-deck="months"] ~ * .direction-toggle,
+.app[data-deck="months"] .direction-toggle { display: none; }
+
+.face.front.face-months {
+  padding: 22px 22px 22px;
+  justify-content: space-between;
+}
+.face.back.face-months {
+  padding: 24px 22px 22px;
+  justify-content: space-between;
+}
+
+/* Title block centred vertically + horizontally on the card; the motif lives
+   in the lower-right corner behind it (low opacity, so the text dominates). */
+.face.front.face-months .month-front {
+  position: relative;
+  z-index: 2;
+  margin: auto 0;
+  padding: 0;
+  text-align: center;
+  width: 100%;
+}
+.month-front .month-en {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(40px, 11vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* Numbers mode — Arabic numeral dominates, label above, English month below. */
+.month-number-block {
+  margin-bottom: 14px;
+  text-align: center;
+}
+.month-number-label {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: clamp(16px, 4vw, 22px);
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.month-number {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+.month-num-arabic {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 144;
+  font-weight: 300;
+  font-size: clamp(120px, 36vw, 200px);
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+}
+.card-stage[data-mode="numbers"] .month-en {
+  font-size: clamp(22px, 6vw, 30px);
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* Back face — Thai-first stack, then meta, then zodiac line. */
+.month-back {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin: auto 0;
+  padding: 0 4px;
+}
+.month-thai {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 800;
+  font-size: clamp(48px, 14vw, 80px);
+  line-height: 1.1;
+  color: var(--accent);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.month-rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(20px, 6vw, 32px);
+  line-height: 1.1;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  margin: 4px 0 14px;
+}
+.month-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 2.8vw, 13px);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  align-items: baseline;
+}
+.month-meta .month-en-small {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(13px, 3.4vw, 15px);
+  color: var(--ink-soft);
+  letter-spacing: 0;
+}
+.month-meta .month-ending {
+  color: var(--accent-2);
+  font-weight: 500;
+}
+.month-dot { color: var(--ink-soft); opacity: 0.5; }
+.month-dash { color: var(--ink-soft); opacity: 0.6; margin: 0 2px; }
+
+.month-zodiac-line {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(13px, 3.4vw, 16px);
+  color: var(--ink);
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 5px;
+  line-height: 1.4;
+}
+.month-zodiac-line .month-zodiac-glyph {
+  font-size: 1.3em;
+  color: var(--gold);
+  margin-right: 2px;
+}
+.month-zodiac-line .month-zodiac-sign {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.month-zodiac-line .month-zodiac-root-th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1.05em;
+}
+.month-zodiac-line .month-zodiac-root-en {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+.month-zodiac-line .month-zodiac-creature {
+  font-style: italic;
+  color: var(--ink);
+}
+
+/* The Months back face flip animation needs a centred speak button. */
+.face.back.face-months .btn-speak { margin: 0 auto 10px; }
+
+/* ============================================================
+   ZODIAC MOTIF — watermark layer (v0.1: Unicode glyph; v0.3: SVG)
+   ============================================================ */
+.motif-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  /* Anchor to lower-right; bleed gently off both edges per spec. */
+  bottom: -8%;
+  right: -8%;
+  width: 95%;
+  height: 95%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  color: var(--ink);
+  opacity: 0.085;
+  mix-blend-mode: multiply;
+  overflow: hidden;
+}
+.motif-back {
+  /* On the back, the watermark sits behind dense text — pull it further out. */
+  opacity: 0.06;
+  bottom: -12%;
+  right: -12%;
+}
+:root[data-theme="dark"] .motif-wrap {
+  opacity: 0.13;
+  mix-blend-mode: normal;
+  color: var(--gold);
+}
+:root[data-theme="dark"] .motif-back {
+  opacity: 0.09;
+}
+/* Unicode glyph rendering (v0.1) — sized to fill the wrap. */
+.motif-wrap .motif-glyph {
+  font-size: clamp(220px, 60vw, 360px);
+  line-height: 1;
+  font-family: 'Fraunces', serif;  /* zodiac glyphs render well in serif */
+  transform: translate(8%, 8%);     /* push focal mass into lower-right crop */
+  user-select: none;
+}
+/* SVG rendering — stroke weight is baked into each motif (consistent across
+   all 12), so CSS just sizes + colours and lets the asset control its lines. */
+.motif-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Make sure card faces clip the motif rather than letting it bleed beyond,
+   and that the gold corner brackets sit on top of the motif (per spec — the
+   bottom-right bracket frames the corner the creature emerges from). */
+.face.face-months { overflow: hidden; position: absolute; }
+.face.face-months::before,
+.face.face-months::after { z-index: 3; }
+
+/* Modal banner — the "Thai months = zodiac signs" learning framing. */
+.modal-banner {
+  padding: 14px 22px 12px;
+  font-family: 'Fraunces', serif;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  font-style: italic;
+  border-bottom: 1px solid var(--rule-soft);
+  background: rgba(184,146,61,0.06);
+}
+.modal-banner[hidden] { display: none; }
+.modal-banner strong {
+  color: var(--accent);
+  font-style: normal;
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+}
+.modal-banner code {
+  font-family: 'JetBrains Mono', monospace;
+  font-style: normal;
+  font-size: 0.85em;
+  background: rgba(184,146,61,0.18);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+/* Months row in the modal — three columns like body-parts plus a tiny meta line. */
+.month-row {
+  display: grid;
+  grid-template-columns: auto 1fr 1.2fr;
+  align-items: baseline;
+  padding: 12px 4px 8px;
+  margin: 0 -4px;
+  border-bottom: 1px solid var(--rule-soft);
+  gap: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+}
+.month-row:last-child { border-bottom: none; }
+.month-row:active { background: rgba(184,146,61,0.14); }
+.month-row .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  min-width: 18px;
+  text-align: right;
+}
+.month-row .th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 19px;
+  line-height: 1.15;
+}
+.month-row .rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.month-row .meta {
+  grid-column: 2 / 4;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  opacity: 0.85;
+}
+.month-row .meta .glyph { color: var(--gold); margin-right: 4px; }
+
 header {
   display: flex;
   align-items: flex-end;

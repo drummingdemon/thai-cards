@@ -1,6 +1,11 @@
-# อวัยวะ — Thai Body Parts Flashcards
+# บัตรคำ — Thai Flashcards
 
 **Live:** https://drummingdemon.github.io/thai-cards/
+
+A zero-dependency flashcard web app for Thai vocabulary. Multi-deck:
+**Body Parts** (21 cards) and **Months** (12 cards, with zodiac etymology).
+No build step, no framework, no CDNs at runtime — scripts, styles, and fonts
+are all served from the repo itself.
 
 <p align="center">
   <img src="screenshots/shot1l.png" width="48%" alt="Front of card, light theme — English prompt with anatomical stick-figure highlight">
@@ -15,9 +20,34 @@
   <img src="screenshots/shot3d.png" width="48%" alt="Word list modal, dark theme — alphabetised vocabulary with tap-to-speak rows">
 </p>
 
-A zero-dependency flashcard web app for learning Thai body-part vocabulary. No build step, no framework, no CDNs at runtime — scripts, styles, and fonts are all served from the repo itself.
-
 Romanization uses tone-marked diacritics (`à` low, `â` falling, `á` high, `ǎ` rising; macron `ā` marks a long mid-tone vowel) so learners can read the pronunciation without prior IPA familiarity.
+
+## Decks
+
+| Deck | Cards | Modes | Default |
+|------|-------|-------|---------|
+| **Body Parts** (อวัยวะ) | 21 | random | random |
+| **Months** (เดือน) | 12 | sequential · random · numbers | sequential |
+
+### Routing
+
+URL hash drives view + mode — bookmarkable, shareable, survives refresh.
+
+- `#` — home / deck selector
+- `#body-parts` — body parts deck
+- `#months` — months, sequential (January → December — test part 1: recite in order)
+- `#months/random` — months, shuffled
+- `#months/numbers` — number-prompt drill (test part 2: ครู says a number, student answers the month)
+
+### Months — what makes them learnable as one system
+
+Thai month names are Sanskrit zodiac signs with a length-encoding suffix. Capricorn through Sagittarius maps onto January → December; the zodiac root lives *inside* each name (มกร in มกรา**คม**, สิงห์ in สิงห**าคม**). The suffix gives the day-count:
+
+- **-คม** (`-khom`) = 31 days
+- **-ยน** (`-yon`) = 30 days
+- **-พันธ์** (`-phan`) = February (alone)
+
+Each card surfaces the zodiac creature + root etymology on the back so the connection lands explicitly, not as twelve isolated Sanskrit words to memorise. The All-Months modal opens with the same framing as a refresher.
 
 ## Features
 
@@ -32,6 +62,27 @@ Romanization uses tone-marked diacritics (`à` low, `â` falling, `á` high, `ǎ
 - **Mobile-friendly layout.** Safe-area insets are honoured so controls stay reachable on devices with rounded corners or dynamic browser chrome.
 
 ## Vocabulary
+
+### Months (เดือน)
+
+| #  | English   | ภาษาไทย      | Romanization        | Days | Ending | Zodiac          | Root        |
+|----|-----------|-------------|---------------------|------|--------|-----------------|-------------|
+| 01 | January   | มกราคม      | mák-rāa-khōm        | 31   | -khom  | ♑ Capricorn     | มกร / makara — sea-dragon |
+| 02 | February  | กุมภาพันธ์   | kūm-phāa-phān       | 28   | -phan  | ♒ Aquarius      | กุมภ์ / kumbha — water pot |
+| 03 | March     | มีนาคม      | mīi-nāa-khōm        | 31   | -khom  | ♓ Pisces        | มีน / mina — fish |
+| 04 | April     | เมษายน      | mēe-sǎa-yōn         | 30   | -yon   | ♈ Aries         | เมษ / mesha — ram |
+| 05 | May       | พฤษภาคม     | phrʉ́t-sà-phāa-khōm  | 31   | -khom  | ♉ Taurus        | พฤษภ / vrishabha — bull |
+| 06 | June      | มิถุนายน     | mí-thù-nāa-yōn      | 30   | -yon   | ♊ Gemini        | มิถุน / mithuna — twins |
+| 07 | July      | กรกฎาคม     | kà-rá-kà-dāa-khōm   | 31   | -khom  | ♋ Cancer        | กรกฎ / karkata — crab |
+| 08 | August    | สิงหาคม      | sǐng-hǎa-khōm       | 31   | -khom  | ♌ Leo           | สิงห์ / singha — lion |
+| 09 | September | กันยายน      | kān-yāa-yōn         | 30   | -yon   | ♍ Virgo         | กันย์ / kanya — maiden |
+| 10 | October   | ตุลาคม       | tù-lāa-khōm         | 31   | -khom  | ♎ Libra         | ตุล / tula — scales |
+| 11 | November  | พฤศจิกายน   | phrʉ́t-sà-jì-kāa-yōn | 30   | -yon   | ♏ Scorpio       | พฤศจิก / vrishchika — scorpion |
+| 12 | December  | ธันวาคม      | than-wāa-khōm       | 31   | -khom  | ♐ Sagittarius   | ธนู / dhanu — bow |
+
+> Romanisations are a best-guess in ครู's system and must be verified against the Wednesday whiteboard before publishing — please open an issue or PR if any tone mark drifts.
+
+### Body parts (อวัยวะ)
 
 | #  | English      | ภาษาไทย   | Romanization |
 |----|--------------|-----------|--------------|
@@ -80,17 +131,26 @@ The speaker button uses the browser's built-in `SpeechSynthesis` API and the sys
 
 ```
 thai-cards/
-├── index.html      # markup: header, card faces, SVG figure, controls, modal
-├── styles.css      # all styles, including light/dark theme variables
-├── fonts.css       # @font-face declarations pointing at fonts/
-├── data.js         # WORDS deck and HIGHLIGHTS coordinates
-├── app.js          # render logic, flip/slide transitions, speech, modal
-├── fonts/          # self-hosted .woff2 files plus OFL license texts
-├── screenshots/    # README preview images
+├── index.html              # home screen + both deck card templates + modal
+├── styles.css              # theme vars, home tiles, mode selector, motif layer
+├── fonts.css               # @font-face declarations pointing at fonts/
+├── data/
+│   ├── body-parts.js       # WORDS + HIGHLIGHTS for the anatomical figure
+│   ├── months.js           # 12 MONTHS with zodiac etymology
+│   ├── zodiac-motifs.js    # MOTIFS registry — Unicode glyph today, SVG slot
+│   └── decks.js            # DECKS + DECK_ORDER registry
+├── app.js                  # hash router + render dispatch + modes + modal
+├── fonts/                  # self-hosted .woff2 + OFL licenses
+├── screenshots/            # README preview images
 └── README.md
 ```
 
-To extend the deck, add an entry to `WORDS` in `data.js`. If the new word maps to a body part, add a matching entry in `HIGHLIGHTS` to position its highlight on the figure (coordinates are in the figure's `viewBox` of 100 × 145).
+### Extending
+
+- **Body parts:** add an entry to `WORDS` in `data/body-parts.js`. Add a matching `HIGHLIGHTS` entry to position the anatomical highlight (coordinates are in the figure's `viewBox` of 100 × 145).
+- **Months:** all 12 already shipped. Romanisations live in `data/months.js`; fix tone marks there.
+- **New deck:** add a data file under `data/`, register the deck in `data/decks.js` with its `items`, `modes`, `defaultMode`, and add the id to `DECK_ORDER`. The home tile + routing pick it up automatically. If the deck needs its own card layout, add face templates to `index.html` and a `renderX()` branch in `app.js`.
+- **Zodiac motifs (v0.3 beauty pass):** replace entries in `data/zodiac-motifs.js` from `{ type: 'glyph', value: '♑' }` to `{ type: 'svg', value: '<svg viewBox="0 0 400 400">…</svg>' }`. The renderer dispatches on `type` automatically. Use `fill: none; stroke: currentColor;` so theme + opacity stay CSS-controlled.
 
 ## Fonts
 

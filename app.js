@@ -1,5 +1,40 @@
-const card       = document.getElementById('card');
-const counter    = document.getElementById('counter');
+// thai-cards — multi-deck flashcard app.
+//
+// Two views: a home/deck-selector and a drill view. The drill view is
+// deck-aware: it hosts one DOM tree per deck (body-parts faces + months faces
+// stay mounted side-by-side, toggled by CSS on `data-deck`). Routing is
+// hash-based:
+//   #                  → home
+//   #body-parts        → body parts (random, the only mode it has)
+//   #months            → months, sequential mode (default — test part 1)
+//   #months/random     → months, shuffled (no repeats until exhausted)
+//   #months/numbers    → number-prompt drill (test part 2)
+//
+// State lives in `state` below. Each render dispatches on `state.deck` to
+// either renderBodyParts() or renderMonth(). The body-parts code path mirrors
+// v1 exactly; the months path is new.
+
+// ---- DOM refs (shared shell) ----
+const appEl       = document.getElementById('app');
+const homeScreen  = document.getElementById('homeScreen');
+const homeDecks   = document.getElementById('homeDecks');
+const deckView    = document.getElementById('deckView');
+const homeBtn     = document.getElementById('homeBtn');
+const deckTitleThai = document.getElementById('deckTitleThai');
+const deckTitleEn   = document.getElementById('deckTitleEn');
+const cardStage   = document.getElementById('cardStage');
+const card        = document.getElementById('card');
+const counter     = document.getElementById('counter');
+const modeSelector = document.getElementById('modeSelector');
+const dirToggle   = document.getElementById('dirToggle');
+const modeLabel   = document.getElementById('modeLabel');
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel  = document.getElementById('themeLabel');
+const homeThemeToggle = document.getElementById('homeThemeToggle');
+const homeThemeLabel  = document.getElementById('homeThemeLabel');
+const metaThemeColor  = document.getElementById('metaThemeColor');
+
+// body-parts refs (v1 — leave behaviour untouched)
 const frontBadge = document.getElementById('frontBadge');
 const backBadge  = document.getElementById('backBadge');
 const frontWord  = document.getElementById('frontWord');
@@ -7,31 +42,57 @@ const frontRom   = document.getElementById('frontRom');
 const backThai   = document.getElementById('backThai');
 const backRom    = document.getElementById('backRom');
 const backEn     = document.getElementById('backEn');
+const speakBtn   = document.getElementById('speakBtn');
+const ring       = document.querySelector('#highlight .ring');
+const dot        = document.querySelector('#highlight .dot');
+
+// months refs
+const moFrontBadge = document.getElementById('moFrontBadge');
+const moBackBadge  = document.getElementById('moBackBadge');
+const moMotifFront = document.getElementById('moMotifFront');
+const moMotifBack  = document.getElementById('moMotifBack');
+const moNumberBlock = document.getElementById('moNumberBlock');
+const moNumArabic  = document.getElementById('moNumArabic');
+const moFrontEn    = document.getElementById('moFrontEn');
+const moBackThai   = document.getElementById('moBackThai');
+const moBackRom    = document.getElementById('moBackRom');
+const moBackEn     = document.getElementById('moBackEn');
+const moBackDays   = document.getElementById('moBackDays');
+const moBackEnding = document.getElementById('moBackEnding');
+const moBackGlyph  = document.getElementById('moBackGlyph');
+const moBackSign   = document.getElementById('moBackSign');
+const moBackRootTh = document.getElementById('moBackRootTh');
+const moBackRootEn = document.getElementById('moBackRootEn');
+const moBackCreature = document.getElementById('moBackCreature');
+const moSpeakBtn   = document.getElementById('moSpeakBtn');
+
+// controls
 const nextBtn    = document.getElementById('nextBtn');
 const flipBtn    = document.getElementById('flipBtn');
 const backBtn    = document.getElementById('backBtn');
 const prevBtn    = document.getElementById('prevBtn');
 const sideNextBtn = document.getElementById('sideNextBtn');
-const dirToggle  = document.getElementById('dirToggle');
-const modeLabel  = document.getElementById('modeLabel');
-const themeToggle = document.getElementById('themeToggle');
-const themeLabel  = document.getElementById('themeLabel');
 const listBtn       = document.getElementById('listBtn');
 const wordListModal = document.getElementById('wordListModal');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose    = document.getElementById('modalClose');
+const modalTitle    = document.getElementById('modalTitle');
+const modalBanner   = document.getElementById('modalBanner');
 const modalList     = document.getElementById('modalList');
-const speakBtn      = document.getElementById('speakBtn');
-const metaThemeColor = document.getElementById('metaThemeColor');
-const ring       = document.querySelector('#highlight .ring');
-const dot        = document.querySelector('#highlight .dot');
 
-let queue = [];
-let index = 0;
-let direction = 'en2th';
-let current = null;
-let pendingStep = 1;
+// ---- State ----
+let state = {
+  view: 'home',      // 'home' | 'deck'
+  deck: null,        // 'body-parts' | 'months'
+  mode: null,        // 'random' | 'sequential' | 'numbers'
+  direction: 'en2th',// body-parts only
+  queue: [],
+  index: 0,
+  current: null,
+  pendingStep: 1
+};
 
+// ---- Helpers ----
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -40,16 +101,164 @@ function shuffle(arr) {
   }
   return a;
 }
+function pad(n) { return String(n).padStart(2, '0'); }
 
-function reshuffle() {
-  queue = shuffle(WORDS);
-  if (current && queue[0] && queue[0].en === current.en && queue.length > 1) {
-    [queue[0], queue[1]] = [queue[1], queue[0]];
-  }
-  index = 0;
+// ---- Routing ----
+function parseHash() {
+  // "#months/numbers" → { deck: 'months', mode: 'numbers' }
+  // "#months"         → { deck: 'months', mode: <default> }
+  // "#body-parts"     → { deck: 'body-parts', mode: 'random' }
+  // ""                → { deck: null, mode: null }
+  const raw = (location.hash || '').replace(/^#/, '').trim();
+  if (!raw) return { deck: null, mode: null };
+  const [deckId, modeId] = raw.split('/');
+  const deck = DECKS[deckId];
+  if (!deck) return { deck: null, mode: null };
+  let mode = modeId && deck.modes.includes(modeId) ? modeId : deck.defaultMode;
+  return { deck: deckId, mode };
 }
 
-function pad(n) { return String(n).padStart(2, '0'); }
+function setHash(deckId, modeId) {
+  if (!deckId) { location.hash = ''; return; }
+  const deck = DECKS[deckId];
+  // Only include the mode segment when it differs from the deck's default,
+  // so URLs stay clean (#months → sequential implicitly).
+  if (modeId && modeId !== deck.defaultMode) {
+    location.hash = `${deckId}/${modeId}`;
+  } else {
+    location.hash = deckId;
+  }
+}
+
+function handleRoute() {
+  const { deck, mode } = parseHash();
+  if (!deck) {
+    enterHome();
+  } else {
+    enterDeck(deck, mode);
+  }
+}
+
+// ---- Views ----
+function enterHome() {
+  state.view = 'home';
+  state.deck = null;
+  state.mode = null;
+  state.current = null;
+  appEl.setAttribute('data-view', 'home');
+  appEl.removeAttribute('data-deck');
+  deckView.hidden = true;
+  homeScreen.hidden = false;
+  closeWordList();
+  syncThemeToggleLabels();
+}
+
+function enterDeck(deckId, mode) {
+  const deck = DECKS[deckId];
+  if (!deck) { enterHome(); return; }
+
+  const reset = (state.deck !== deckId) || (state.mode !== mode);
+  state.view = 'deck';
+  state.deck = deckId;
+  state.mode = mode;
+
+  appEl.setAttribute('data-view', 'deck');
+  appEl.setAttribute('data-deck', deckId);
+  cardStage.setAttribute('data-deck', deckId);
+  cardStage.setAttribute('data-mode', mode);
+  deckView.hidden = false;
+  homeScreen.hidden = true;
+
+  deckTitleThai.textContent = deck.nameThai;
+  deckTitleEn.textContent = deck.name + (deckId === 'body-parts' ? ' · รักภาษาไทย L2' : '');
+
+  // Mode selector only shown when the deck offers a choice.
+  if (deck.modes.length > 1) {
+    modeSelector.hidden = false;
+    modeSelector.querySelectorAll('.mode-btn').forEach(btn => {
+      const isMine = deck.modes.includes(btn.dataset.mode);
+      btn.style.display = isMine ? '' : 'none';
+      btn.setAttribute('aria-selected', btn.dataset.mode === mode ? 'true' : 'false');
+    });
+  } else {
+    modeSelector.hidden = true;
+  }
+
+  // Direction toggle: body-parts only. (Numbers mode handles direction in its layout.)
+  dirToggle.style.display = deckId === 'body-parts' ? '' : 'none';
+
+  if (reset) {
+    buildQueue(deck, mode);
+    state.index = 0;
+    state.current = null;
+  }
+  render();
+}
+
+// ---- Queue construction per (deck, mode) ----
+function buildQueue(deck, mode) {
+  if (mode === 'sequential') {
+    state.queue = deck.items.slice();      // 1→12 order
+  } else if (mode === 'random' || mode === 'numbers') {
+    state.queue = shuffle(deck.items);
+    // Numbers mode is just "random with a different front layout".
+  } else {
+    state.queue = deck.items.slice();
+  }
+}
+
+function reshuffleSameMode() {
+  const deck = DECKS[state.deck];
+  buildQueue(deck, state.mode);
+  // Avoid showing the same card immediately after a reshuffle.
+  if (state.current && state.queue[0] === state.current && state.queue.length > 1) {
+    [state.queue[0], state.queue[1]] = [state.queue[1], state.queue[0]];
+  }
+  state.index = 0;
+}
+
+// ---- Rendering ----
+function render() {
+  if (state.deck === 'body-parts') renderBodyParts();
+  else if (state.deck === 'months') renderMonth();
+}
+
+function renderBodyParts() {
+  if (state.index >= state.queue.length) reshuffleSameMode();
+  state.current = state.queue[state.index];
+  const w = state.current;
+  if (state.direction === 'en2th') {
+    frontBadge.textContent = 'English';
+    backBadge.textContent  = 'ภาษาไทย';
+    frontWord.textContent  = w.en;
+    frontWord.classList.remove('thai-mode');
+    frontRom.textContent   = '';
+    frontRom.classList.remove('visible');
+    backThai.textContent   = w.th;
+    backRom.textContent    = w.rom;
+    backEn.textContent     = w.en;
+    backThai.style = '';
+    backEn.style   = '';
+  } else {
+    frontBadge.textContent = 'ภาษาไทย';
+    backBadge.textContent  = 'English';
+    frontWord.textContent  = w.th;
+    frontWord.classList.add('thai-mode');
+    frontRom.textContent   = w.rom;
+    frontRom.classList.add('visible');
+    backThai.textContent   = w.en;
+    backThai.style.fontFamily = "'Fraunces', serif";
+    backThai.style.fontWeight = '300';
+    backThai.style.color = 'var(--ink)';
+    backRom.textContent    = w.rom;
+    backEn.textContent     = '— ' + w.th;
+    backEn.style.fontFamily = "'Noto Serif Thai', serif";
+    backEn.style.fontStyle  = 'normal';
+  }
+  setHighlight(w);
+  counter.textContent = `${pad(state.index + 1)} / ${pad(state.queue.length)}`;
+  reanimateCard();
+}
 
 function setHighlight(word) {
   const h = HIGHLIGHTS[word.en];
@@ -67,72 +276,112 @@ function setHighlight(word) {
     dot.setAttribute('cy', h.cy);
     dot.setAttribute('r', Math.min(Math.min(h.rx, h.ry) * 0.55, 1.4));
   }
-  // re-trigger fadeIn animation
   const group = document.getElementById('highlight');
   group.style.animation = 'none';
   void group.offsetWidth;
   group.style.animation = '';
 }
 
-function render() {
-  if (index >= queue.length) reshuffle();
-  current = queue[index];
+function renderMonth() {
+  if (state.index >= state.queue.length) reshuffleSameMode();
+  state.current = state.queue[state.index];
+  const m = state.current;
 
-  if (direction === 'en2th') {
-    frontBadge.textContent = 'English';
-    backBadge.textContent  = 'ภาษาไทย';
-    frontWord.textContent  = current.en;
-    frontWord.classList.remove('thai-mode');
-    frontRom.textContent   = '';
-    frontRom.classList.remove('visible');
-    backThai.textContent   = current.th;
-    backRom.textContent    = current.rom;
-    backEn.textContent     = current.en;
-    backThai.style = '';
-    backEn.style   = '';
+  // Front content
+  moFrontBadge.textContent = state.mode === 'numbers' ? 'เดือนที่' : 'Month';
+  if (state.mode === 'numbers') {
+    moNumberBlock.hidden = false;
+    moNumArabic.textContent = m.num;
+    moFrontEn.textContent   = m.en;
   } else {
-    frontBadge.textContent = 'ภาษาไทย';
-    backBadge.textContent  = 'English';
-    frontWord.textContent  = current.th;
-    frontWord.classList.add('thai-mode');
-    frontRom.textContent   = current.rom;
-    frontRom.classList.add('visible');
-    backThai.textContent   = current.en;
-    backThai.style.fontFamily = "'Fraunces', serif";
-    backThai.style.fontWeight = '300';
-    backThai.style.color = 'var(--ink)';
-    backRom.textContent    = current.rom;
-    backEn.textContent     = '— ' + current.th;
-    backEn.style.fontFamily = "'Noto Serif Thai', serif";
-    backEn.style.fontStyle  = 'normal';
+    moNumberBlock.hidden = true;
+    moFrontEn.textContent = m.en;
   }
 
-  setHighlight(current);
-  counter.textContent = `${pad(index + 1)} / ${pad(queue.length)}`;
+  // Counter — for sequential, the index IS the calendar month; otherwise position in deck.
+  if (state.mode === 'sequential') {
+    // Spec format: "MAR · 03 / 12"
+    const abbr = m.en.slice(0, 3).toUpperCase();
+    counter.textContent = `${abbr} · ${pad(m.num)} / 12`;
+  } else {
+    counter.textContent = `${pad(state.index + 1)} / ${pad(state.queue.length)}`;
+  }
 
+  // Watermark motif — Unicode glyph today; SVG drops in via MOTIFS[n] later.
+  const motif = (typeof MOTIFS !== 'undefined' && MOTIFS[m.num]) || { type: 'glyph', value: m.zodiac.glyph };
+  setMotif(moMotifFront, motif);
+  setMotif(moMotifBack,  motif);
+
+  // Back content
+  moBackThai.textContent   = m.th;
+  moBackRom.textContent    = m.rom;
+  moBackEn.textContent     = m.en;
+  moBackDays.textContent   = `${m.days} days`;
+  moBackEnding.textContent = m.ending;
+  moBackGlyph.textContent  = m.zodiac.glyph;
+  moBackSign.textContent   = m.zodiac.sign;
+  // Accent-colour just the root substring living inside the Thai name (the
+  // "money line" — show the connection at a glance).
+  moBackRootTh.textContent = m.zodiac.rootThai;
+  moBackRootEn.textContent = m.zodiac.root;
+  moBackCreature.textContent = m.zodiac.creature;
+
+  reanimateCard();
+}
+
+function setMotif(host, motif) {
+  if (!host) return;
+  host.innerHTML = '';
+  if (motif.type === 'glyph') {
+    const span = document.createElement('span');
+    span.className = 'motif-glyph';
+    span.textContent = motif.value;
+    host.appendChild(span);
+  } else if (motif.type === 'svg') {
+    host.innerHTML = motif.value;
+  }
+}
+
+function reanimateCard() {
   card.classList.remove('flipped');
   card.classList.remove('enter');
   void card.offsetWidth;
   card.classList.add('enter');
 }
 
+// ---- Card actions ----
 function flip() {
   if (card.classList.contains('exit')) return;
   card.classList.toggle('flipped');
 }
 function next() {
   if (card.classList.contains('exit')) return;
-  pendingStep = 1;
+  state.pendingStep = 1;
   card.classList.remove('enter');
   card.classList.add('exit');
 }
 function prev() {
   if (card.classList.contains('exit')) return;
-  pendingStep = -1;
+  state.pendingStep = -1;
   card.classList.remove('enter');
   card.classList.add('exit');
 }
 
+card.addEventListener('animationend', (e) => {
+  if (e.target !== card) return;
+  if (e.animationName === 'cardExit') {
+    card.classList.add('no-transition');
+    card.classList.remove('exit');
+    state.index += state.pendingStep;
+    if (state.index < 0) state.index = state.queue.length - 1;
+    render();
+  } else if (e.animationName === 'cardEnter') {
+    card.classList.remove('enter');
+    card.classList.remove('no-transition');
+  }
+});
+
+// ---- Speech ----
 const speechAvailable = 'speechSynthesis' in window;
 let cachedThaiVoice = null;
 function pickThaiVoice() {
@@ -169,16 +418,24 @@ function speakThai(text, btn) {
   window.speechSynthesis.speak(u);
 }
 
+// ---- Wire controls ----
 card.addEventListener('click', flip);
 flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
 if (speakBtn) {
   if (!speechAvailable) {
     speakBtn.style.display = 'none';
+    if (moSpeakBtn) moSpeakBtn.style.display = 'none';
   } else {
     speakBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (current) speakThai(current.th, speakBtn);
+      if (state.current && state.deck === 'body-parts') speakThai(state.current.th, speakBtn);
     });
+    if (moSpeakBtn) {
+      moSpeakBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (state.current && state.deck === 'months') speakThai(state.current.th, moSpeakBtn);
+      });
+    }
   }
 }
 nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
@@ -186,41 +443,78 @@ if (backBtn) backBtn.addEventListener('click', (e) => { e.stopPropagation(); pre
 if (sideNextBtn) sideNextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
 if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
 
-card.addEventListener('animationend', (e) => {
-  if (e.target !== card) return;
-  if (e.animationName === 'cardExit') {
-    card.classList.add('no-transition');
-    card.classList.remove('exit');
-    index += pendingStep;
-    if (index < 0) index = queue.length - 1;
-    render();
-  } else if (e.animationName === 'cardEnter') {
-    card.classList.remove('enter');
-    card.classList.remove('no-transition');
-  }
-});
+homeBtn.addEventListener('click', () => setHash(null));
 
 dirToggle.addEventListener('click', () => {
-  direction = direction === 'en2th' ? 'th2en' : 'en2th';
-  modeLabel.textContent = direction === 'en2th' ? 'EN → TH' : 'TH → EN';
-  current = null;
-  reshuffle();
+  if (state.deck !== 'body-parts') return;
+  state.direction = state.direction === 'en2th' ? 'th2en' : 'en2th';
+  modeLabel.textContent = state.direction === 'en2th' ? 'EN → TH' : 'TH → EN';
+  state.current = null;
+  reshuffleSameMode();
   render();
 });
 
-function applyTheme(mode) {
-  document.documentElement.setAttribute('data-theme', mode);
-  themeLabel.textContent = mode === 'dark' ? 'Dark' : 'Light';
-  if (metaThemeColor) metaThemeColor.setAttribute('content', mode === 'dark' ? '#181410' : '#F2E8D0');
-  try { localStorage.setItem('theme', mode); } catch (e) {}
-}
-applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  applyTheme(current === 'dark' ? 'light' : 'dark');
+// Mode selector for months.
+modeSelector.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!state.deck) return;
+    const newMode = btn.dataset.mode;
+    if (newMode === state.mode) return;
+    setHash(state.deck, newMode);
+  });
 });
 
-function buildWordList() {
+// ---- Theme ----
+function applyTheme(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  if (metaThemeColor) metaThemeColor.setAttribute('content', mode === 'dark' ? '#181410' : '#F2E8D0');
+  try { localStorage.setItem('theme', mode); } catch (e) {}
+  syncThemeToggleLabels();
+}
+function syncThemeToggleLabels() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (themeLabel) themeLabel.textContent = isDark ? 'Dark' : 'Light';
+  if (homeThemeLabel) homeThemeLabel.textContent = isDark ? 'Dark' : 'Light';
+}
+applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+themeToggle.addEventListener('click', toggleTheme);
+if (homeThemeToggle) homeThemeToggle.addEventListener('click', toggleTheme);
+
+// ---- Home — deck tiles ----
+function buildHomeDecks() {
+  homeDecks.innerHTML = '';
+  DECK_ORDER.forEach(deckId => {
+    const d = DECKS[deckId];
+    if (!d) return;
+    const tile = document.createElement('div');
+    tile.className = 'home-deck';
+    tile.setAttribute('role', 'button');
+    tile.setAttribute('aria-label', `${d.name} deck — ${d.items.length} cards`);
+    tile.dataset.deck = deckId;
+    const mark = (typeof HOME_MARKS !== 'undefined' && HOME_MARKS[deckId]) || '';
+    tile.innerHTML = `
+      <div class="home-deck-mark" aria-hidden="true">${mark}</div>
+      <div class="home-deck-thai">${d.nameThai}</div>
+      <div class="home-deck-en">${d.name}</div>
+      <div class="home-deck-meta">
+        <span class="home-deck-count">${d.items.length} cards</span>
+        <span class="home-deck-modes">${d.modes.join(' · ')}</span>
+      </div>
+    `;
+    tile.addEventListener('click', () => setHash(deckId, null));
+    homeDecks.appendChild(tile);
+  });
+}
+
+// ---- Word list modal ----
+function buildModalForBodyParts() {
+  modalTitle.innerHTML = 'อวัยวะ <span class="modal-subtitle">All Words</span>';
+  modalBanner.hidden = true;
+  modalBanner.innerHTML = '';
   modalList.innerHTML = '';
   const frag = document.createDocumentFragment();
   const sorted = WORDS.slice().sort((a, b) => a.en.localeCompare(b.en));
@@ -238,8 +532,41 @@ function buildWordList() {
   });
   modalList.appendChild(frag);
 }
+function buildModalForMonths() {
+  modalTitle.innerHTML = 'เดือน <span class="modal-subtitle">All Months</span>';
+  modalBanner.hidden = false;
+  // The "one system, not three tasks" framing from spec § "The learning framing".
+  modalBanner.innerHTML = `
+    Thai months = zodiac signs. <strong>Capricorn → Sagittarius</strong> maps onto
+    January → December. Learn the creatures in order and you've learned the months
+    in order. The suffix gives the length: <code>-คม</code> = 31 days,
+    <code>-ยน</code> = 30 days, <code>-พันธ์</code> = February.
+  `;
+  modalList.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  MONTHS.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'month-row';
+    row.setAttribute('role', 'button');
+    row.setAttribute('aria-label', `speak ${m.en} in Thai`);
+    row.innerHTML = `
+      <span class="num">${pad(m.num)}</span>
+      <span class="th">${m.th}</span>
+      <span class="rom">${m.rom}</span>
+      <span class="meta">
+        <span class="glyph">${m.zodiac.glyph}</span>
+        ${m.en} · ${m.days} days · ${m.ending} ·
+        ${m.zodiac.rootThai} ${m.zodiac.root} — ${m.zodiac.creature}
+      </span>
+    `;
+    row.addEventListener('click', () => speakThai(m.th));
+    frag.appendChild(row);
+  });
+  modalList.appendChild(frag);
+}
 function openWordList() {
-  buildWordList();
+  if (state.deck === 'months') buildModalForMonths();
+  else buildModalForBodyParts();
   wordListModal.classList.add('open');
   wordListModal.setAttribute('aria-hidden', 'false');
 }
@@ -253,13 +580,20 @@ listBtn.addEventListener('click', (e) => { e.stopPropagation(); openWordList(); 
 modalClose.addEventListener('click', closeWordList);
 modalBackdrop.addEventListener('click', closeWordList);
 
+// ---- Keyboard ----
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isModalOpen()) { closeWordList(); return; }
+  if (e.key === 'Escape') {
+    if (isModalOpen()) { closeWordList(); return; }
+    if (state.view === 'deck') { setHash(null); return; }
+  }
   if (isModalOpen()) return;
+  if (state.view !== 'deck') return;
   if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
   if (e.key === 'ArrowRight' || e.key === 'n') { next(); }
   if (e.key === 'ArrowLeft' || e.key === 'p') { prev(); }
 });
 
-reshuffle();
-render();
+// ---- Boot ----
+window.addEventListener('hashchange', handleRoute);
+buildHomeDecks();
+handleRoute();
