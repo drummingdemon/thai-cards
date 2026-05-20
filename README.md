@@ -152,6 +152,10 @@ thai-cards/
 - **New deck:** add a data file under `data/`, register the deck in `data/decks.js` with its `items`, `modes`, `defaultMode`, and add the id to `DECK_ORDER`. The home tile + routing pick it up automatically. If the deck needs its own card layout, add face templates to `index.html` and a `renderX()` branch in `app.js`.
 - **Zodiac motifs (v0.3 beauty pass):** replace entries in `data/zodiac-motifs.js` from `{ type: 'glyph', value: '♑' }` to `{ type: 'svg', value: '<svg viewBox="0 0 400 400">…</svg>' }`. The renderer dispatches on `type` automatically. Use `fill: none; stroke: currentColor;` so theme + opacity stay CSS-controlled.
 
+## Artwork
+
+The zodiac watermarks on the Months deck and the deck-signature marks on the home screen are silhouettes from [game-icons.net](https://game-icons.net) by **Lorc**, used under the [Creative Commons Attribution 3.0 Unported](https://creativecommons.org/licenses/by/3.0/) licence. Each entry in `data/zodiac-motifs.js` carries a single-path SVG with `fill="currentColor"` so theme + opacity stay CSS-controlled (watermark renders dark in light theme, gold in dark theme, both at ~10% opacity).
+
 ## Fonts
 
 All three typefaces are self-hosted from `fonts/` and ship under the **SIL Open Font License 1.1**. The full license text plus each font's upstream copyright notice lives alongside the `.woff2` files:
