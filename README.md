@@ -65,22 +65,22 @@ Each card surfaces the zodiac creature + root etymology on the back so the conne
 
 ### Months (เดือน)
 
-| #  | English   | ภาษาไทย      | Romanization        | Days | Ending | Zodiac          | Root        |
-|----|-----------|-------------|---------------------|------|--------|-----------------|-------------|
-| 01 | January   | มกราคม      | mák-rāa-khōm        | 31   | -khom  | ♑ Capricorn     | มกร / makara — sea-dragon |
-| 02 | February  | กุมภาพันธ์   | kūm-phāa-phān       | 28   | -phan  | ♒ Aquarius      | กุมภ์ / kumbha — water pot |
-| 03 | March     | มีนาคม      | mīi-nāa-khōm        | 31   | -khom  | ♓ Pisces        | มีน / mina — fish |
-| 04 | April     | เมษายน      | mēe-sǎa-yōn         | 30   | -yon   | ♈ Aries         | เมษ / mesha — ram |
-| 05 | May       | พฤษภาคม     | phrʉ́t-sà-phāa-khōm  | 31   | -khom  | ♉ Taurus        | พฤษภ / vrishabha — bull |
-| 06 | June      | มิถุนายน     | mí-thù-nāa-yōn      | 30   | -yon   | ♊ Gemini        | มิถุน / mithuna — twins |
-| 07 | July      | กรกฎาคม     | kà-rá-kà-dāa-khōm   | 31   | -khom  | ♋ Cancer        | กรกฎ / karkata — crab |
-| 08 | August    | สิงหาคม      | sǐng-hǎa-khōm       | 31   | -khom  | ♌ Leo           | สิงห์ / singha — lion |
-| 09 | September | กันยายน      | kān-yāa-yōn         | 30   | -yon   | ♍ Virgo         | กันย์ / kanya — maiden |
-| 10 | October   | ตุลาคม       | tù-lāa-khōm         | 31   | -khom  | ♎ Libra         | ตุล / tula — scales |
-| 11 | November  | พฤศจิกายน   | phrʉ́t-sà-jì-kāa-yōn | 30   | -yon   | ♏ Scorpio       | พฤศจิก / vrishchika — scorpion |
-| 12 | December  | ธันวาคม      | than-wāa-khōm       | 31   | -khom  | ♐ Sagittarius   | ธนู / dhanu — bow |
+| #  | English   | ภาษาไทย      | Romanization        | Days | Ending | Zodiac      | Root        |
+|----|-----------|-------------|---------------------|------|--------|-------------|-------------|
+| 01 | January   | มกราคม      | mákarāakhōm         | 31   | -khom  | Capricorn   | มกร / makara — sea-dragon |
+| 02 | February  | กุมภาพันธ์   | kūmphāaphān         | 28   | -phan  | Aquarius    | กุมภ์ / kumbha — water pot |
+| 03 | March     | มีนาคม      | mīināakhōm          | 31   | -khom  | Pisces      | มีน / mina — fish |
+| 04 | April     | เมษายน      | mēesǎayōn           | 30   | -yon   | Aries       | เมษ / mesha — ram |
+| 05 | May       | พฤษภาคม     | phrútsaphāakhōm     | 31   | -khom  | Taurus      | พฤษภ / vrishabha — bull |
+| 06 | June      | มิถุนายน     | míthùnāayōn         | 30   | -yon   | Gemini      | มิถุน / mithuna — twins |
+| 07 | July      | กรกฎาคม     | karákadāakhōm       | 31   | -khom  | Cancer      | กรกฎ / karkata — crab |
+| 08 | August    | สิงหาคม      | sǐŋhǎakhōm          | 31   | -khom  | Leo         | สิงห์ / singha — lion |
+| 09 | September | กันยายน      | kānyāayōn           | 30   | -yon   | Virgo       | กันย์ / kanya — maiden |
+| 10 | October   | ตุลาคม       | tùlāakhōm           | 31   | -khom  | Libra       | ตุล / tula — scales |
+| 11 | November  | พฤศจิกายน   | phrútsacìkāayōn     | 30   | -yon   | Scorpio     | พฤศจิก / vrishchika — scorpion |
+| 12 | December  | ธันวาคม      | thānwāakhōm         | 31   | -khom  | Sagittarius | ธนู / dhanu — bow |
 
-> Romanisations are a best-guess in ครู's system and must be verified against the Wednesday whiteboard before publishing — please open an issue or PR if any tone mark drifts.
+> Romanisations transcribed verbatim from the school book (Bangkok edition, Mahatun Plaza). Joined-syllable form with tone marks; `ŋ` denotes the velar nasal in สิงหาคม.
 
 ### Body parts (อวัยวะ)
 
