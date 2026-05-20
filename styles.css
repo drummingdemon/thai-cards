@@ -343,7 +343,18 @@ body::before {
 }
 
 /* Title block centred vertically + horizontally on the card; the motif lives
-   in the lower-right corner behind it (low opacity, so the text dominates). */
+   in the lower-right corner behind it (low opacity, so the text dominates).
+   The explicit z-index lifts the child into its own stacking context — which
+   in 3D-transformed parents (the card flip) breaks out of the parent's
+   backface culling. Re-applying backface-visibility: hidden + a translateZ
+   pins it back inside the face's 3D layer so it disappears on flip-away. */
+.face.front.face-months .month-front,
+.face.back.face-months .month-back,
+.face.face-months .motif-wrap {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
 .face.front.face-months .month-front {
   position: relative;
   z-index: 2;
