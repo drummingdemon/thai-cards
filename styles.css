@@ -548,23 +548,52 @@ body::before {
 
 /* Modal banner — the "Thai months = zodiac signs" learning framing. */
 .modal-banner {
-  padding: 14px 22px 12px;
+  border-bottom: 1px solid var(--rule-soft);
+  background: rgba(184,146,61,0.06);
+}
+.modal-banner[hidden] { display: none; }
+.modal-banner-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  padding: 10px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 0;
+}
+.modal-banner-toggle:active { background: rgba(184,146,61,0.10); }
+.modal-banner-toggle-label { font-weight: 500; }
+.modal-banner-chevron {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--accent);
+  transition: transform 0.18s ease;
+}
+.modal-banner.collapsed .modal-banner-chevron { transform: rotate(-90deg); }
+.modal-banner-body {
+  padding: 2px 22px 14px;
   font-family: 'Fraunces', serif;
   font-size: 13.5px;
   line-height: 1.45;
   color: var(--ink-soft);
   font-style: italic;
-  border-bottom: 1px solid var(--rule-soft);
-  background: rgba(184,146,61,0.06);
+  overflow: hidden;
 }
-.modal-banner[hidden] { display: none; }
-.modal-banner strong {
+.modal-banner.collapsed .modal-banner-body { display: none; }
+.modal-banner-body strong {
   color: var(--accent);
   font-style: normal;
   font-family: 'Noto Serif Thai', serif;
   font-weight: 700;
 }
-.modal-banner code {
+.modal-banner-body code {
   font-family: 'JetBrains Mono', monospace;
   font-style: normal;
   font-size: 0.85em;

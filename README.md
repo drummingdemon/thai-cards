@@ -47,7 +47,7 @@ Thai month names are Sanskrit zodiac signs with a length-encoding suffix. Capric
 - **-ยน** (`-yon`) = 30 days
 - **-พันธ์** (`-phan`) = February (alone)
 
-Each card surfaces the zodiac creature + root etymology on the back so the connection lands explicitly, not as twelve isolated Sanskrit words to memorise. The All-Months modal opens with the same framing as a refresher.
+Each card surfaces the zodiac creature + root etymology on the back so the connection lands explicitly, not as twelve isolated Sanskrit words to memorise. The All-Months modal opens with the same framing as a refresher — the explainer is collapsible (tap *Why these names?*) and the open/closed state persists in `localStorage` so returning learners get straight to the list.
 
 ## Features
 

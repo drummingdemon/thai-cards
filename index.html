@@ -270,7 +270,13 @@
         <span>Tap a word to hear it in Thai</span>
       </div>
       <!-- The framing banner (zodiac→months) renders here for months. -->
-      <div class="modal-banner" id="modalBanner" hidden></div>
+      <div class="modal-banner" id="modalBanner" hidden>
+        <button class="modal-banner-toggle" id="modalBannerToggle" aria-expanded="true" aria-controls="modalBannerBody">
+          <span class="modal-banner-toggle-label">Why these names?</span>
+          <span class="modal-banner-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="modal-banner-body" id="modalBannerBody"></div>
+      </div>
       <div class="modal-list" id="modalList"></div>
     </div>
   </div>

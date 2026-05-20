@@ -77,6 +77,8 @@ const modalBackdrop = document.getElementById('modalBackdrop');
 const modalClose    = document.getElementById('modalClose');
 const modalTitle    = document.getElementById('modalTitle');
 const modalBanner   = document.getElementById('modalBanner');
+const modalBannerToggle = document.getElementById('modalBannerToggle');
+const modalBannerBody   = document.getElementById('modalBannerBody');
 const modalList     = document.getElementById('modalList');
 
 // ---- State ----
@@ -509,10 +511,26 @@ function buildHomeDecks() {
 }
 
 // ---- Word list modal ----
+const BANNER_COLLAPSED_KEY = 'monthsInfoCollapsed';
+function applyBannerCollapsedState() {
+  let collapsed = false;
+  try { collapsed = localStorage.getItem(BANNER_COLLAPSED_KEY) === '1'; } catch (e) {}
+  modalBanner.classList.toggle('collapsed', collapsed);
+  if (modalBannerToggle) modalBannerToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}
+if (modalBannerToggle) {
+  modalBannerToggle.addEventListener('click', () => {
+    const nowCollapsed = !modalBanner.classList.contains('collapsed');
+    modalBanner.classList.toggle('collapsed', nowCollapsed);
+    modalBannerToggle.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    try { localStorage.setItem(BANNER_COLLAPSED_KEY, nowCollapsed ? '1' : '0'); } catch (e) {}
+  });
+}
+
 function buildModalForBodyParts() {
   modalTitle.innerHTML = 'อวัยวะ <span class="modal-subtitle">All Words</span>';
   modalBanner.hidden = true;
-  modalBanner.innerHTML = '';
+  modalBannerBody.innerHTML = '';
   modalList.innerHTML = '';
   const frag = document.createDocumentFragment();
   const sorted = WORDS.slice().sort((a, b) => a.en.localeCompare(b.en));
@@ -534,12 +552,13 @@ function buildModalForMonths() {
   modalTitle.innerHTML = 'เดือน <span class="modal-subtitle">All Months</span>';
   modalBanner.hidden = false;
   // The "one system, not three tasks" framing from spec § "The learning framing".
-  modalBanner.innerHTML = `
+  modalBannerBody.innerHTML = `
     Thai months = zodiac signs. <strong>Capricorn → Sagittarius</strong> maps onto
     January → December. Learn the creatures in order and you've learned the months
     in order. The suffix gives the length: <code>-คม</code> = 31 days,
     <code>-ยน</code> = 30 days, <code>-พันธ์</code> = February.
   `;
+  applyBannerCollapsedState();
   modalList.innerHTML = '';
   const frag = document.createDocumentFragment();
   MONTHS.forEach(m => {
