@@ -59,7 +59,6 @@ const moBackRom    = document.getElementById('moBackRom');
 const moBackEn     = document.getElementById('moBackEn');
 const moBackDays   = document.getElementById('moBackDays');
 const moBackEnding = document.getElementById('moBackEnding');
-const moBackGlyph  = document.getElementById('moBackGlyph');
 const moBackSign   = document.getElementById('moBackSign');
 const moBackRootTh = document.getElementById('moBackRootTh');
 const moBackRootEn = document.getElementById('moBackRootEn');
@@ -307,8 +306,10 @@ function renderMonth() {
     counter.textContent = `${pad(state.index + 1)} / ${pad(state.queue.length)}`;
   }
 
-  // Watermark motif — Unicode glyph today; SVG drops in via MOTIFS[n] later.
-  const motif = (typeof MOTIFS !== 'undefined' && MOTIFS[m.num]) || { type: 'glyph', value: m.zodiac.glyph };
+  // Watermark motif — SVG silhouette from MOTIFS[n]. (Unicode glyphs are
+  // intentionally NOT used as a fallback any more: on iOS they render as
+  // purple emoji, which clashes with the house style.)
+  const motif = (typeof MOTIFS !== 'undefined' && MOTIFS[m.num]) || null;
   setMotif(moMotifFront, motif);
   setMotif(moMotifBack,  motif);
 
@@ -318,7 +319,6 @@ function renderMonth() {
   moBackEn.textContent     = m.en;
   moBackDays.textContent   = `${m.days} days`;
   moBackEnding.textContent = m.ending;
-  moBackGlyph.textContent  = m.zodiac.glyph;
   moBackSign.textContent   = m.zodiac.sign;
   // Accent-colour just the root substring living inside the Thai name (the
   // "money line" — show the connection at a glance).
@@ -332,14 +332,12 @@ function renderMonth() {
 function setMotif(host, motif) {
   if (!host) return;
   host.innerHTML = '';
-  if (motif.type === 'glyph') {
-    const span = document.createElement('span');
-    span.className = 'motif-glyph';
-    span.textContent = motif.value;
-    host.appendChild(span);
-  } else if (motif.type === 'svg') {
+  if (!motif) return;
+  if (motif.type === 'svg') {
     host.innerHTML = motif.value;
   }
+  // Note: glyph rendering was removed intentionally — iOS turned Unicode
+  // zodiac chars into purple emoji that broke the visual language.
 }
 
 function reanimateCard() {
@@ -554,7 +552,6 @@ function buildModalForMonths() {
       <span class="th">${m.th}</span>
       <span class="rom">${m.rom}</span>
       <span class="meta">
-        <span class="glyph">${m.zodiac.glyph}</span>
         ${m.en} · ${m.days} days · ${m.ending} ·
         ${m.zodiac.rootThai} ${m.zodiac.root} — ${m.zodiac.creature}
       </span>

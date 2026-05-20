@@ -463,11 +463,6 @@ body::before {
   gap: 5px;
   line-height: 1.4;
 }
-.month-zodiac-line .month-zodiac-glyph {
-  font-size: 1.3em;
-  color: var(--gold);
-  margin-right: 2px;
-}
 .month-zodiac-line .month-zodiac-sign {
   font-style: italic;
   color: var(--ink-soft);
@@ -529,15 +524,7 @@ body::before {
 :root[data-theme="dark"] .motif-back {
   opacity: 0.09;
 }
-/* Unicode glyph rendering (v0.1) — sized to fill the wrap. */
-.motif-wrap .motif-glyph {
-  font-size: clamp(220px, 60vw, 360px);
-  line-height: 1;
-  font-family: 'Fraunces', serif;  /* zodiac glyphs render well in serif */
-  transform: translate(8%, 8%);     /* push focal mass into lower-right crop */
-  user-select: none;
-}
-/* SVG rendering — stroke weight is baked into each motif (consistent across
+/* SVG rendering — stroke/fill is baked into each motif (consistent across
    all 12), so CSS just sizes + colours and lets the asset control its lines. */
 .motif-wrap svg {
   width: 100%;
@@ -633,7 +620,6 @@ body::before {
   margin-top: 2px;
   opacity: 0.85;
 }
-.month-row .meta .glyph { color: var(--gold); margin-right: 4px; }
 
 header {
   display: flex;
