@@ -27,7 +27,7 @@ Romanization uses tone-marked diacritics (`à` low, `â` falling, `á` high, `ǎ
 | Deck | Cards | Modes | Default |
 |------|-------|-------|---------|
 | **Body Parts** (อวัยวะ) | 21 | random | random |
-| **Months** (เดือน) | 12 | sequential · random · numbers | sequential |
+| **Months** (เดือน) | 12 | sequential · random · numbers · list | sequential |
 
 ### Routing
 
@@ -38,6 +38,7 @@ URL hash drives view + mode — bookmarkable, shareable, survives refresh.
 - `#months` — months, sequential (January → December — test part 1: recite in order)
 - `#months/random` — months, shuffled
 - `#months/numbers` — number-prompt drill (test part 2: ครู says a number, student answers the month)
+- `#months/list` — 2×6 grid of all twelve months on one screen; each capsule is a giant translucent number with the romanization on top and the zodiac silhouette behind. Tap any tile to hear it spoken — built for last-minute cramming.
 
 ### Months — what makes them learnable as one system
 
