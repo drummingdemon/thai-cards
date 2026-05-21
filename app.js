@@ -223,7 +223,17 @@ function renderList(deck) {
     setMotif(motifWrap, motif);
 
     const num = document.createElement('span'); num.className = 'num'; num.textContent = String(m.num);
-    const rom = document.createElement('span'); rom.className = 'rom'; rom.textContent = m.rom;
+    const rom = document.createElement('span'); rom.className = 'rom';
+    // Split the romanization at its day-count suffix so the zodiac root can
+    // carry a subtle accent tint — e.g. "makaraa" | "khōm".
+    const romMatch = m.rom.match(/^(.+?)(khōm|yōn|phān)$/);
+    if (romMatch) {
+      const root   = document.createElement('span'); root.className   = 'rom-root';   root.textContent   = romMatch[1];
+      const suffix = document.createElement('span'); suffix.className = 'rom-suffix'; suffix.textContent = romMatch[2];
+      rom.append(root, suffix);
+    } else {
+      rom.textContent = m.rom;
+    }
     tile.append(motifWrap, num, rom);
     tile.addEventListener('click', () => speakThai(m.th, tile));
     frag.appendChild(tile);

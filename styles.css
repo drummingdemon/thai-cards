@@ -399,6 +399,12 @@ body::before {
   white-space: nowrap;
   padding: 0 4px;
 }
+/* Zodiac root carries a subtle warm tint so the eye can pick up
+   the meaningful chunk (the Sanskrit zodiac word) at a glance, while
+   the day-count suffix stays in the body ink. */
+.list-tile .rom .rom-root {
+  color: color-mix(in srgb, var(--ink) 62%, var(--accent) 38%);
+}
 
 /* Zodiac silhouette watermark — same idea as the card back, scoped per tile. */
 .list-tile .motif-wrap {
