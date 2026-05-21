@@ -79,6 +79,7 @@ const modalTitle    = document.getElementById('modalTitle');
 const modalBanner   = document.getElementById('modalBanner');
 const modalBannerToggle = document.getElementById('modalBannerToggle');
 const modalBannerBody   = document.getElementById('modalBannerBody');
+const listGrid      = document.getElementById('listGrid');
 const modalList     = document.getElementById('modalList');
 
 // ---- State ----
@@ -148,6 +149,8 @@ function enterHome() {
   state.current = null;
   appEl.setAttribute('data-view', 'home');
   appEl.removeAttribute('data-deck');
+  appEl.removeAttribute('data-mode');
+  if (listGrid) { listGrid.hidden = true; listGrid.innerHTML = ''; }
   deckView.hidden = true;
   homeScreen.hidden = false;
   closeWordList();
@@ -165,10 +168,12 @@ function enterDeck(deckId, mode) {
 
   appEl.setAttribute('data-view', 'deck');
   appEl.setAttribute('data-deck', deckId);
+  appEl.setAttribute('data-mode', mode);
   cardStage.setAttribute('data-deck', deckId);
   cardStage.setAttribute('data-mode', mode);
   deckView.hidden = false;
   homeScreen.hidden = true;
+  listGrid.hidden = (mode !== 'list');
 
   deckTitleThai.textContent = deck.nameThai;
   deckTitleEn.textContent = deck.name + (deckId === 'body-parts' ? ' · รักภาษาไทย L2' : '');
@@ -188,12 +193,42 @@ function enterDeck(deckId, mode) {
   // Direction toggle: body-parts only. (Numbers mode handles direction in its layout.)
   dirToggle.style.display = deckId === 'body-parts' ? '' : 'none';
 
+  if (mode === 'list') {
+    renderList(deck);
+    return;
+  }
+
   if (reset) {
     buildQueue(deck, mode);
     state.index = 0;
     state.current = null;
   }
   render();
+}
+
+function renderList(deck) {
+  listGrid.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  deck.items.forEach(m => {
+    const tile = document.createElement('button');
+    tile.className = 'list-tile';
+    tile.type = 'button';
+    tile.setAttribute('aria-label', `speak ${m.en} in Thai`);
+
+    // Zodiac silhouette watermark, same SVG asset the cards use.
+    const motif = (typeof MOTIFS !== 'undefined' && MOTIFS[m.num]) || null;
+    const motifWrap = document.createElement('div');
+    motifWrap.className = 'motif-wrap';
+    motifWrap.setAttribute('aria-hidden', 'true');
+    setMotif(motifWrap, motif);
+
+    const num = document.createElement('span'); num.className = 'num'; num.textContent = String(m.num);
+    const rom = document.createElement('span'); rom.className = 'rom'; rom.textContent = m.rom;
+    tile.append(motifWrap, num, rom);
+    tile.addEventListener('click', () => speakThai(m.th, tile));
+    frag.appendChild(tile);
+  });
+  listGrid.appendChild(frag);
 }
 
 // ---- Queue construction per (deck, mode) ----
@@ -604,6 +639,7 @@ window.addEventListener('keydown', (e) => {
   }
   if (isModalOpen()) return;
   if (state.view !== 'deck') return;
+  if (state.mode === 'list') return;
   if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
   if (e.key === 'ArrowRight' || e.key === 'n') { next(); }
   if (e.key === 'ArrowLeft' || e.key === 'p') { prev(); }

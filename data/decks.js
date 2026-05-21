@@ -18,7 +18,7 @@ const DECKS = {
     name: 'Months',
     nameThai: 'เดือน',
     items: typeof MONTHS !== 'undefined' ? MONTHS : [],
-    modes: ['sequential', 'random', 'numbers'],
+    modes: ['sequential', 'random', 'numbers', 'list'],
     defaultMode: 'sequential',
     motif: 'zodiac'   // per-item motif lookup via MOTIFS[item.num]
   }

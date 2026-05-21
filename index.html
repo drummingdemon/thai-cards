@@ -70,6 +70,7 @@
         <button class="mode-btn" data-mode="sequential" role="tab" aria-selected="true">Sequential</button>
         <button class="mode-btn" data-mode="random" role="tab" aria-selected="false">Random</button>
         <button class="mode-btn" data-mode="numbers" role="tab" aria-selected="false">Numbers</button>
+        <button class="mode-btn" data-mode="list" role="tab" aria-selected="false">List</button>
       </div>
 
       <div class="top-controls">
@@ -234,6 +235,9 @@
          </div>
         </div>
       </div>
+
+      <!-- List mode: 2x6 grid of month capsules, fills the cardStage's place -->
+      <div class="list-grid" id="listGrid" hidden></div>
 
       <div class="controls">
         <button class="btn-flip" id="flipBtn" aria-label="flip card">↻</button>
