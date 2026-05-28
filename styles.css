@@ -814,20 +814,37 @@ body::before {
   margin-top: 10px;
 }
 .nl-option {
-  font-family: 'Noto Serif Thai', serif;
-  font-weight: 600;
-  font-size: clamp(15px, 4vw, 19px);
-  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
   background: transparent;
   border: 1.5px solid var(--rule-strong);
   border-radius: 10px;
-  padding: 12px 8px;
+  padding: 10px 8px;
   cursor: pointer;
   text-transform: none;
   letter-spacing: 0;
   transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 .nl-option:active { transform: scale(0.97); }
+.nl-opt-th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 600;
+  font-size: clamp(15px, 4vw, 19px);
+  line-height: 1.15;
+  color: var(--ink);
+}
+.nl-opt-rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(9px, 2.4vw, 11px);
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+}
+.nl-option.correct .nl-opt-th,
+.nl-option.correct .nl-opt-rom { color: var(--accent-2); }
+.nl-option.wrong .nl-opt-th,
+.nl-option.wrong .nl-opt-rom { color: var(--accent); }
 .nl-option.correct {
   border-color: var(--accent-2);
   background: rgba(31,74,63,0.14);
@@ -867,7 +884,7 @@ body::before {
 .nl-ref { padding: 6px 0 4px; }
 .nl-ref-row {
   display: grid;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: minmax(3.4em, auto) auto 1fr;
   align-items: baseline;
   gap: 10px;
   padding: 11px 4px;
@@ -878,12 +895,19 @@ body::before {
   transition: background 0.12s ease;
 }
 .nl-ref-row:active { background: rgba(184,146,61,0.14); }
+.nl-ref-head { display: flex; flex-direction: column; gap: 1px; }
 .nl-ref-th {
   font-family: 'Noto Serif Thai', serif;
   font-weight: 700;
   font-size: 18px;
   color: var(--accent);
-  min-width: 2.4em;
+  line-height: 1.1;
+}
+.nl-ref-rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
 }
 .nl-ref-range {
   font-family: 'JetBrains Mono', monospace;
@@ -921,6 +945,80 @@ body::before {
 }
 .nl-traps strong { color: var(--accent); font-weight: 600; }
 .nl-traps em { font-style: italic; color: var(--ink); }
+
+/* Reference pager — pinned segmented control (Periods | All times). */
+.modal-tabs {
+  display: flex;
+  gap: 0;
+  padding: 10px 22px 2px;
+  flex-shrink: 0;
+}
+.modal-tabs[hidden] { display: none; }
+.modal-tab {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  padding: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.modal-tab:first-child { border-radius: 8px 0 0 8px; }
+.modal-tab:last-child  { border-radius: 0 8px 8px 0; border-left: none; }
+.modal-tab[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+  font-weight: 500;
+}
+
+/* All-times reference list — mini clock graphic + reading per row. */
+.nl-clocklist { padding: 4px 0; }
+.nl-clocklist-row {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  margin: 0 -4px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.nl-clocklist-row:last-child { border-bottom: none; }
+.nl-clocklist-row:active { background: rgba(184,146,61,0.14); }
+.nl-clocklist-clock {
+  width: 58px; height: 58px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+}
+.nl-clocklist-clock .clock-svg { width: 100%; height: 100%; max-height: none; }
+.nl-clocklist-text { min-width: 0; }
+.nl-cl-th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.nl-cl-rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+.nl-cl-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
 
 /* Modal banner — the "Thai months = zodiac signs" learning framing. */
 .modal-banner {

@@ -91,6 +91,7 @@ const modalBannerToggle = document.getElementById('modalBannerToggle');
 const modalBannerBody   = document.getElementById('modalBannerBody');
 const listGrid      = document.getElementById('listGrid');
 const modalList     = document.getElementById('modalList');
+const modalTabs     = document.getElementById('modalTabs');
 
 // ---- State ----
 let state = {
@@ -385,7 +386,10 @@ function renderNaalikaMC(t) {
   nlFrontBody.classList.add('nl-mc');
   const opts = mcOptions(t, DECKS.naalika.items);
   const optsHtml = opts.map(o =>
-    `<button class="nl-option" data-correct="${o.th === t.th ? '1' : '0'}">${o.th}</button>`
+    `<button class="nl-option" data-correct="${o.th === t.th ? '1' : '0'}">
+      <span class="nl-opt-th">${o.th}</span>
+      <span class="nl-opt-rom">${o.rom}</span>
+    </button>`
   ).join('');
   nlFrontBody.innerHTML = `
     <div class="nl-clock-wrap nl-clock-mc" data-period="${t.period}">${drawClock(t.h, t.m, { numerals: clockNumerals })}</div>
@@ -773,6 +777,7 @@ function buildModalForBodyParts() {
   modalBannerBody.innerHTML = '';
   const bpHint = document.getElementById('modalHint');
   if (bpHint) bpHint.hidden = !speechAvailable;
+  if (modalTabs) modalTabs.hidden = true;
   modalList.innerHTML = '';
   const frag = document.createDocumentFragment();
   const sorted = WORDS.slice().sort((a, b) => a.en.localeCompare(b.en));
@@ -794,6 +799,7 @@ function buildModalForMonths() {
   modalTitle.innerHTML = 'เดือน <span class="modal-subtitle">All Months</span>';
   const moHint = document.getElementById('modalHint');
   if (moHint) moHint.hidden = !speechAvailable;
+  if (modalTabs) modalTabs.hidden = true;
   modalBanner.hidden = false;
   // The "one system, not three tasks" framing from spec § "The learning framing".
   modalBannerBody.innerHTML = `
@@ -824,17 +830,61 @@ function buildModalForMonths() {
   });
   modalList.appendChild(frag);
 }
+let naalikaRefTab = 'periods'; // 'periods' | 'times'
+
 function buildModalForNaalika() {
-  modalTitle.innerHTML = 'นาฬิกา <span class="modal-subtitle">Six-Hour Clock</span>';
+  modalTitle.innerHTML = 'นาฬิกา <span class="modal-subtitle">Reference</span>';
   modalBanner.hidden = true;
   modalBannerBody.innerHTML = '';
   const hint = document.getElementById('modalHint');
   if (hint) hint.hidden = true;  // the reference IS the content here
+  if (modalTabs) {
+    modalTabs.hidden = false;
+    modalTabs.innerHTML = `
+      <button class="modal-tab" data-tab="periods" role="tab">Periods</button>
+      <button class="modal-tab" data-tab="times" role="tab">All times</button>`;
+    modalTabs.querySelectorAll('.modal-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (naalikaRefTab === tab.dataset.tab) return;
+        naalikaRefTab = tab.dataset.tab;
+        renderNaalikaRef();
+      });
+    });
+  }
+  renderNaalikaRef();
+}
+
+function renderNaalikaRef() {
+  if (modalTabs) {
+    modalTabs.querySelectorAll('.modal-tab').forEach(tab => {
+      tab.setAttribute('aria-selected', tab.dataset.tab === naalikaRefTab ? 'true' : 'false');
+    });
+  }
+  modalList.innerHTML = naalikaRefTab === 'times' ? refTimesHTML() : refPeriodsHTML();
+  modalList.scrollTop = 0;
+
+  if (naalikaRefTab === 'times') {
+    const sorted = TIMES.slice().sort((a, b) => (a.h * 60 + a.m) - (b.h * 60 + b.m));
+    modalList.querySelectorAll('.nl-clocklist-row').forEach((row, i) => {
+      row.addEventListener('click', () => speakThai(sorted[i].th, row));
+    });
+  } else {
+    modalList.querySelectorAll('.nl-ref-row').forEach((row, i) => {
+      const p = PERIODS[PERIOD_ORDER[i]];
+      row.addEventListener('click', () => speakThai(p.th, row));
+    });
+  }
+}
+
+function refPeriodsHTML() {
   let html = '<div class="nl-ref">';
   PERIOD_ORDER.forEach(key => {
     const p = PERIODS[key];
     html += `<div class="nl-ref-row" role="button" aria-label="speak ${p.rom}">
-      <span class="nl-ref-th">${p.th}</span>
+      <span class="nl-ref-head">
+        <span class="nl-ref-th">${p.th}</span>
+        <span class="nl-ref-rom">${p.rom}</span>
+      </span>
       <span class="nl-ref-range">${p.range}</span>
       <span class="nl-ref-rule">${p.rule}</span>
     </div>`;
@@ -849,13 +899,27 @@ function buildModalForNaalika() {
       <li>The clock face shows 7; the mouth says หนึ่งทุ่ม. That gap is the whole game.</li>
     </ul>
   </div>`;
-  modalList.innerHTML = html;
-  // Tap a period row to hear its bell-word.
-  modalList.querySelectorAll('.nl-ref-row').forEach((row, i) => {
-    const p = PERIODS[PERIOD_ORDER[i]];
-    row.addEventListener('click', () => speakThai(p.th));
-  });
+  return html;
 }
+
+function refTimesHTML() {
+  const sorted = TIMES.slice().sort((a, b) => (a.h * 60 + a.m) - (b.h * 60 + b.m));
+  let html = '<div class="nl-clocklist">';
+  sorted.forEach(t => {
+    const p = PERIODS[t.period];
+    html += `<div class="nl-clocklist-row" role="button" aria-label="speak ${t.en}">
+      <div class="nl-clocklist-clock">${drawClock(t.h, t.m, { numerals: 'none' })}</div>
+      <div class="nl-clocklist-text">
+        <div class="nl-cl-th">${t.th}</div>
+        <div class="nl-cl-rom">${t.rom}</div>
+        <div class="nl-cl-meta">${t.en} · ${p.th}</div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
 function openWordList() {
   if (state.deck === 'months') buildModalForMonths();
   else if (state.deck === 'naalika') buildModalForNaalika();
