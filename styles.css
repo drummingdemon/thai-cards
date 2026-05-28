@@ -440,9 +440,13 @@ body::before {
 /* ============================================================
    MONTHS CARD LAYOUT
    ============================================================ */
-/* Hide the other deck's faces — they stay mounted but inert. */
-.card-stage[data-deck="body-parts"] .face-months    { display: none; }
-.card-stage[data-deck="months"]     .face-body-parts { display: none; }
+/* Hide the other decks' faces — they stay mounted but inert. */
+.card-stage[data-deck="body-parts"] .face-months,
+.card-stage[data-deck="body-parts"] .face-naalika    { display: none; }
+.card-stage[data-deck="months"]     .face-body-parts,
+.card-stage[data-deck="months"]     .face-naalika     { display: none; }
+.card-stage[data-deck="naalika"]    .face-body-parts,
+.card-stage[data-deck="naalika"]    .face-months      { display: none; }
 
 /* Direction toggle is body-parts only (months always EN → TH-on-reveal). */
 .card-stage[data-deck="months"] ~ * .direction-toggle,
@@ -660,6 +664,263 @@ body::before {
 }
 .face.face-months::before,
 .face.face-months::after { z-index: 1; }
+
+/* ============================================================
+   NAALIKA (clock) CARD LAYOUT
+   ============================================================ */
+.face.front.face-naalika,
+.face.back.face-naalika {
+  padding: 22px 22px 20px;
+  justify-content: space-between;
+  align-items: stretch;
+}
+.nl-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Clock — the hero graphic. */
+.nl-clock-wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
+.clock-svg {
+  height: 100%;
+  width: auto;
+  max-height: 280px;
+  max-width: 100%;
+  color: var(--ink);
+}
+.clock-svg .clock-hand-hour,
+.clock-svg .clock-hand-min,
+.clock-svg .clock-center { color: var(--accent); stroke: var(--accent); }
+.clock-svg .clock-center { fill: var(--accent); }
+.clock-svg .clock-numerals { fill: var(--ink-soft); }
+.clock-svg .clock-ticks { color: var(--ink-soft); }
+.nl-clock-mc { flex: 0 0 auto; }
+.nl-clock-mc .clock-svg { max-height: 138px; }
+/* Quiz layout: anchor to the top and tighten gaps so clock + 4 options +
+   feedback never clip on a short card. */
+.nl-body.nl-mc { justify-content: flex-start; gap: 4px; padding-top: 2px; overflow-y: auto; }
+
+/* Period tint — a faint radial wash behind the clock that anchors which part
+   of the day the time sits in: cool for early morning, warm for afternoon →
+   night. Noon/midnight stay neutral. Subtle by design. */
+.nl-clock-wrap[data-period="tii"],
+.nl-clock-wrap[data-period="chao"] {
+  background: radial-gradient(circle at 50% 45%, rgba(31,74,63,0.10), transparent 62%);
+}
+.nl-clock-wrap[data-period="baai"],
+.nl-clock-wrap[data-period="yen"],
+.nl-clock-wrap[data-period="thum"] {
+  background: radial-gradient(circle at 50% 45%, rgba(193,63,31,0.10), transparent 62%);
+}
+:root[data-theme="dark"] .nl-clock-wrap[data-period="tii"],
+:root[data-theme="dark"] .nl-clock-wrap[data-period="chao"] {
+  background: radial-gradient(circle at 50% 45%, rgba(122,184,164,0.12), transparent 62%);
+}
+:root[data-theme="dark"] .nl-clock-wrap[data-period="baai"],
+:root[data-theme="dark"] .nl-clock-wrap[data-period="yen"],
+:root[data-theme="dark"] .nl-clock-wrap[data-period="thum"] {
+  background: radial-gradient(circle at 50% 45%, rgba(229,112,76,0.13), transparent 62%);
+}
+
+/* Period-focus filter — horizontally scrollable chip row (naalika only). */
+.period-filter {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 2px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.period-filter::-webkit-scrollbar { display: none; }
+.period-filter[hidden] { display: none; }
+.period-chip {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-family: 'Noto Serif Thai', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.period-chip:active { transform: scale(0.96); }
+.period-chip[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+/* Spoken-time reading (clock-mode back, thai-mode front). */
+.nl-read { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.nl-th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 800;
+  font-size: clamp(30px, 8vw, 50px);
+  line-height: 1.2;
+  color: var(--accent);
+}
+.nl-rom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(15px, 4vw, 21px);
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.nl-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, 2.8vw, 13px);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 2px;
+}
+.nl-dot { opacity: 0.6; }
+.nl-en {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(13px, 3.4vw, 16px);
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+.face.face-naalika .btn-speak { margin: 2px auto; }
+
+/* Quiz (multiple choice). */
+.nl-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+.nl-option {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 600;
+  font-size: clamp(15px, 4vw, 19px);
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 12px 8px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+.nl-option:active { transform: scale(0.97); }
+.nl-option.correct {
+  border-color: var(--accent-2);
+  background: rgba(31,74,63,0.14);
+  color: var(--accent-2);
+}
+:root[data-theme="dark"] .nl-option.correct { background: rgba(122,184,164,0.16); }
+.nl-option.wrong {
+  border-color: var(--accent);
+  background: rgba(193,63,31,0.12);
+  color: var(--accent);
+}
+.nl-option.dim { opacity: 0.4; }
+.nl-feedback {
+  margin-top: 10px;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+}
+.nl-feedback[hidden] { display: none; }
+.nl-fb-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.nl-fb-rule {
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* Quiz answers in place — no flip, so hide the flip button. */
+.app[data-deck="naalika"][data-mode="mc"] .btn-flip { display: none; }
+
+/* Reference panel (period cheat-sheet) inside the modal. */
+.nl-ref { padding: 6px 0 4px; }
+.nl-ref-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding: 11px 4px;
+  margin: 0 -4px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.nl-ref-row:active { background: rgba(184,146,61,0.14); }
+.nl-ref-th {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  min-width: 2.4em;
+}
+.nl-ref-range {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.nl-ref-rule {
+  font-family: 'Fraunces', serif;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.nl-traps {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+.nl-traps-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.nl-traps ul { margin: 0; padding-left: 18px; }
+.nl-traps li {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-bottom: 7px;
+}
+.nl-traps strong { color: var(--accent); font-weight: 600; }
+.nl-traps em { font-style: italic; color: var(--ink); }
 
 /* Modal banner — the "Thai months = zodiac signs" learning framing. */
 .modal-banner {
@@ -1118,7 +1379,7 @@ button:active { transform: scale(0.96); }
   color: var(--ink-soft);
   opacity: 0.9;
 }
-.direction-toggle, .theme-toggle {
+.direction-toggle, .theme-toggle, .numeral-toggle {
   display: flex; align-items: center; gap: 6px;
   cursor: pointer;
   padding: 4px 6px; margin: -4px -6px;
@@ -1126,6 +1387,9 @@ button:active { transform: scale(0.96); }
 }
 .direction-toggle:active { background: rgba(31,74,63,0.1); }
 .direction-toggle .mode { color: var(--accent-2); font-weight: 500; }
+.numeral-toggle[hidden] { display: none; }
+.numeral-toggle:active { background: rgba(184,146,61,0.18); }
+.numeral-toggle .mode { color: var(--accent); font-weight: 500; }
 .theme-toggle:active { background: rgba(184,146,61,0.18); }
 .theme-toggle .theme-icon {
   display: inline-block;

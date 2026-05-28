@@ -23,7 +23,9 @@
 <link rel="stylesheet" href="styles.css">
 <script defer src="data/body-parts.js"></script>
 <script defer src="data/months.js"></script>
+<script defer src="data/times.js"></script>
 <script defer src="data/zodiac-motifs.js"></script>
+<script defer src="clock.js"></script>
 <script defer src="data/decks.js"></script>
 <script defer src="app.js"></script>
 </head>
@@ -71,6 +73,9 @@
         <button class="mode-btn" data-mode="random" role="tab" aria-selected="false">Random</button>
         <button class="mode-btn" data-mode="numbers" role="tab" aria-selected="false">Numbers</button>
         <button class="mode-btn" data-mode="list" role="tab" aria-selected="false">List</button>
+        <button class="mode-btn" data-mode="clock" role="tab" aria-selected="false">Clock→Thai</button>
+        <button class="mode-btn" data-mode="thai" role="tab" aria-selected="false">Thai→Clock</button>
+        <button class="mode-btn" data-mode="mc" role="tab" aria-selected="false">Quiz</button>
       </div>
 
       <div class="top-controls">
@@ -79,7 +84,11 @@
           <span class="label" id="themeLabel">Light</span>
         </span>
         <span class="direction-toggle" id="dirToggle" role="button" aria-label="Toggle direction">Mode: <span class="mode" id="modeLabel">EN → TH</span></span>
+        <span class="numeral-toggle" id="numeralToggle" role="button" aria-label="Toggle clock numerals" hidden>Numerals: <span class="mode" id="numeralLabel">12</span></span>
       </div>
+
+      <!-- Period-focus filter (naalika only) -->
+      <div class="period-filter" id="periodFilter" hidden role="tablist" aria-label="Period focus"></div>
 
       <div class="card-stage" id="cardStage" data-deck="body-parts" data-mode="random">
         <button class="side-arrow side-prev" id="prevBtn" aria-label="previous card">←</button>
@@ -229,6 +238,21 @@
                 <span class="month-zodiac-creature" id="moBackCreature">the sea-dragon</span>
               </div>
             </div>
+            <div class="hint">→ next</div>
+          </div>
+
+          <!-- ================================================================
+               NAALIKA (clock) — front + back; bodies filled by renderNaalika()
+               ================================================================ -->
+          <div class="face front face-naalika" hidden>
+            <span class="badge" id="nlFrontBadge">Clock</span>
+            <div class="nl-body nl-front-body" id="nlFrontBody"></div>
+            <div class="hint" id="nlFrontHint">tap to reveal ↻</div>
+          </div>
+
+          <div class="face back face-naalika" hidden>
+            <span class="badge" id="nlBackBadge">เวลา</span>
+            <div class="nl-body nl-back-body" id="nlBackBody"></div>
             <div class="hint">→ next</div>
           </div>
 

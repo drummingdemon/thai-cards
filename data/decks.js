@@ -21,8 +21,17 @@ const DECKS = {
     modes: ['sequential', 'random', 'numbers', 'list'],
     defaultMode: 'sequential',
     motif: 'zodiac'   // per-item motif lookup via MOTIFS[item.num]
+  },
+  'naalika': {
+    id: 'naalika',
+    name: 'Clock',
+    nameThai: 'นาฬิกา',
+    items: typeof TIMES !== 'undefined' ? TIMES : [],
+    modes: ['clock', 'thai', 'mc'],
+    defaultMode: 'clock',
+    motif: 'clock'    // analog clock face drawn per card via drawClock()
   }
 };
 
 // Ordered list for the home screen.
-const DECK_ORDER = ['body-parts', 'months'];
+const DECK_ORDER = ['body-parts', 'months', 'naalika'];

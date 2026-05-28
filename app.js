@@ -28,6 +28,9 @@ const counter     = document.getElementById('counter');
 const modeSelector = document.getElementById('modeSelector');
 const dirToggle   = document.getElementById('dirToggle');
 const modeLabel   = document.getElementById('modeLabel');
+const numeralToggle = document.getElementById('numeralToggle');
+const numeralLabel  = document.getElementById('numeralLabel');
+const periodFilter  = document.getElementById('periodFilter');
 const themeToggle = document.getElementById('themeToggle');
 const themeLabel  = document.getElementById('themeLabel');
 const homeThemeToggle = document.getElementById('homeThemeToggle');
@@ -65,6 +68,13 @@ const moBackRootEn = document.getElementById('moBackRootEn');
 const moBackCreature = document.getElementById('moBackCreature');
 const moSpeakBtn   = document.getElementById('moSpeakBtn');
 
+// naalika refs
+const nlFrontBadge = document.getElementById('nlFrontBadge');
+const nlFrontBody  = document.getElementById('nlFrontBody');
+const nlFrontHint  = document.getElementById('nlFrontHint');
+const nlBackBadge  = document.getElementById('nlBackBadge');
+const nlBackBody   = document.getElementById('nlBackBody');
+
 // controls
 const nextBtn    = document.getElementById('nextBtn');
 const flipBtn    = document.getElementById('flipBtn');
@@ -88,11 +98,16 @@ let state = {
   deck: null,        // 'body-parts' | 'months'
   mode: null,        // 'random' | 'sequential' | 'numbers'
   direction: 'en2th',// body-parts only
+  periodFilter: 'all', // naalika only — drill one period at a time
   queue: [],
   index: 0,
   current: null,
   pendingStep: 1
 };
+
+// Clock numeral preference (naalika) — persisted.
+let clockNumerals = 'arabic'; // 'arabic' | 'thai'
+try { if (localStorage.getItem('clockNumerals') === 'thai') clockNumerals = 'thai'; } catch (e) {}
 
 // ---- Helpers ----
 function shuffle(arr) {
@@ -178,6 +193,10 @@ function enterDeck(deckId, mode) {
   deckTitleThai.textContent = deck.nameThai;
   deckTitleEn.textContent = deck.name + (deckId === 'body-parts' ? ' · รักภาษาไทย L2' : '');
 
+  // The list/modal button doubles as a reference sheet for naalika.
+  const listLabel = document.querySelector('#listBtn .btn-list-label');
+  if (listLabel) listLabel.textContent = deckId === 'naalika' ? 'Reference' : 'Word List';
+
   // Mode selector only shown when the deck offers a choice.
   if (deck.modes.length > 1) {
     modeSelector.hidden = false;
@@ -192,6 +211,15 @@ function enterDeck(deckId, mode) {
 
   // Direction toggle: body-parts only. (Numbers mode handles direction in its layout.)
   dirToggle.style.display = deckId === 'body-parts' ? '' : 'none';
+
+  // Naalika-only controls: numeral switch + period-focus filter.
+  const isNaalika = deckId === 'naalika';
+  if (numeralToggle) numeralToggle.hidden = !isNaalika;
+  if (periodFilter) {
+    periodFilter.hidden = !isNaalika;
+    if (isNaalika && !periodFilter.childElementCount) buildPeriodFilter();
+  }
+  if (isNaalika) syncNaalikaControls();
 
   if (mode === 'list') {
     renderList(deck);
@@ -243,6 +271,16 @@ function renderList(deck) {
 
 // ---- Queue construction per (deck, mode) ----
 function buildQueue(deck, mode) {
+  if (deck.id === 'naalika') {
+    // All naalika modes shuffle; the period filter narrows the pool first.
+    let items = deck.items.slice();
+    if (state.periodFilter && state.periodFilter !== 'all') {
+      const filtered = items.filter(t => t.period === state.periodFilter);
+      if (filtered.length) items = filtered;
+    }
+    state.queue = shuffle(items);
+    return;
+  }
   if (mode === 'sequential') {
     state.queue = deck.items.slice();      // 1→12 order
   } else if (mode === 'random' || mode === 'numbers') {
@@ -267,6 +305,120 @@ function reshuffleSameMode() {
 function render() {
   if (state.deck === 'body-parts') renderBodyParts();
   else if (state.deck === 'months') renderMonth();
+  else if (state.deck === 'naalika') renderNaalika();
+}
+
+// Inline speaker glyph, reused by dynamically-built naalika faces.
+const SPEAKER_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+
+function wireNaalikaSpeak(container, t) {
+  const b = container.querySelector('.btn-speak');
+  if (!b) return;
+  if (!speechAvailable) { b.style.display = 'none'; return; }
+  b.addEventListener('click', (e) => { e.stopPropagation(); speakThai(t.th, b); });
+}
+
+// Pick four MC options: the correct one plus three distractors, preferring
+// same-period near-misses (หนึ่งทุ่ม vs สองทุ่ม) over random times.
+function mcOptions(correct, bank) {
+  const same   = shuffle(bank.filter(t => t.period === correct.period && t.th !== correct.th));
+  const others = shuffle(bank.filter(t => t.period !== correct.period && t.th !== correct.th));
+  const distractors = [];
+  const seen = new Set([correct.th]);
+  for (const pool of [same, others]) {
+    for (const t of pool) {
+      if (distractors.length >= 3) break;
+      if (!seen.has(t.th)) { distractors.push(t); seen.add(t.th); }
+    }
+  }
+  return shuffle([correct, ...distractors]);
+}
+
+function renderNaalika() {
+  if (state.index >= state.queue.length) reshuffleSameMode();
+  state.current = state.queue[state.index];
+  const t = state.current;
+  counter.textContent = `${pad(state.index + 1)} / ${pad(state.queue.length)}`;
+
+  if (state.mode === 'mc') { renderNaalikaMC(t); reanimateCard(); return; }
+
+  nlFrontBody.classList.remove('nl-mc');
+  if (state.mode === 'thai') {
+    // Read the Thai → set the clock. Front: spoken time. Back: clock + label.
+    nlFrontBadge.textContent = 'เวลา';
+    nlFrontBody.innerHTML = `
+      <div class="nl-read">
+        <div class="nl-th">${t.th}</div>
+        <button class="btn-speak" aria-label="speak in Thai">${SPEAKER_SVG}</button>
+        <div class="nl-rom">${t.rom}</div>
+      </div>`;
+    nlFrontHint.textContent = 'tap to see the clock ↻';
+    nlBackBadge.textContent = 'Clock';
+    nlBackBody.innerHTML = `
+      <div class="nl-clock-wrap" data-period="${t.period}">${drawClock(t.h, t.m, { numerals: clockNumerals })}</div>
+      <div class="nl-en">${t.en}</div>`;
+    wireNaalikaSpeak(nlFrontBody, t);
+  } else {
+    // Default 'clock': see the clock → say the time. Front: clock. Back: reading.
+    const p = PERIODS[t.period];
+    nlFrontBadge.textContent = 'Clock';
+    nlFrontBody.innerHTML = `<div class="nl-clock-wrap" data-period="${t.period}">${drawClock(t.h, t.m, { numerals: clockNumerals })}</div>`;
+    nlFrontHint.textContent = 'tap to reveal ↻';
+    nlBackBadge.textContent = 'เวลา';
+    nlBackBody.innerHTML = `
+      <div class="nl-read">
+        <div class="nl-th">${t.th}</div>
+        <button class="btn-speak" aria-label="speak in Thai">${SPEAKER_SVG}</button>
+        <div class="nl-rom">${t.rom}</div>
+        <div class="nl-meta">
+          <span class="nl-en">${t.en}</span><span class="nl-dot">·</span>
+          <span class="nl-period">${p.th} ${p.range}</span>
+        </div>
+      </div>`;
+    wireNaalikaSpeak(nlBackBody, t);
+  }
+  reanimateCard();
+}
+
+function renderNaalikaMC(t) {
+  nlFrontBadge.textContent = 'Quiz';
+  nlFrontBody.classList.add('nl-mc');
+  const opts = mcOptions(t, DECKS.naalika.items);
+  const optsHtml = opts.map(o =>
+    `<button class="nl-option" data-correct="${o.th === t.th ? '1' : '0'}">${o.th}</button>`
+  ).join('');
+  nlFrontBody.innerHTML = `
+    <div class="nl-clock-wrap nl-clock-mc" data-period="${t.period}">${drawClock(t.h, t.m, { numerals: clockNumerals })}</div>
+    <div class="nl-options">${optsHtml}</div>
+    <div class="nl-feedback" hidden></div>`;
+  nlFrontHint.textContent = 'pick the reading';
+
+  const optButtons = nlFrontBody.querySelectorAll('.nl-option');
+  const feedback   = nlFrontBody.querySelector('.nl-feedback');
+  let answered = false;
+  optButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (answered) return;
+      answered = true;
+      const correct = btn.dataset.correct === '1';
+      optButtons.forEach(b => {
+        if (b.dataset.correct === '1') b.classList.add('correct');
+        else b.classList.add('dim');
+      });
+      if (!correct) btn.classList.add('wrong');
+      speakThai(t.th);
+      const p = PERIODS[t.period];
+      feedback.hidden = false;
+      feedback.innerHTML = `
+        <div class="nl-fb-line">${t.th} · ${t.rom} · ${t.en}</div>
+        <div class="nl-fb-rule">${p.rule}</div>`;
+      nlFrontHint.textContent = '→ next';
+    });
+  });
+  // Back face is unused in quiz mode.
+  nlBackBadge.textContent = '';
+  nlBackBody.innerHTML = '';
 }
 
 function renderBodyParts() {
@@ -397,6 +549,7 @@ function reanimateCard() {
 // ---- Card actions ----
 function flip() {
   if (card.classList.contains('exit')) return;
+  if (state.deck === 'naalika' && state.mode === 'mc') return;  // quiz answers in place
   card.classList.toggle('flipped');
 }
 function next() {
@@ -509,6 +662,48 @@ modeSelector.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
+// ---- Naalika controls: numeral switch + period-focus filter ----
+function syncNaalikaControls() {
+  if (numeralLabel) numeralLabel.textContent = clockNumerals === 'thai' ? '๑๒' : '12';
+  if (periodFilter) {
+    periodFilter.querySelectorAll('.period-chip').forEach(chip => {
+      chip.setAttribute('aria-selected', chip.dataset.period === state.periodFilter ? 'true' : 'false');
+    });
+  }
+}
+function buildPeriodFilter() {
+  periodFilter.innerHTML = '';
+  const chips = [['all', 'All']].concat(PERIOD_ORDER.map(k => [k, PERIODS[k].th]));
+  chips.forEach(([key, label]) => {
+    const chip = document.createElement('button');
+    chip.className = 'period-chip';
+    chip.type = 'button';
+    chip.dataset.period = key;
+    chip.setAttribute('role', 'tab');
+    chip.setAttribute('aria-selected', key === state.periodFilter ? 'true' : 'false');
+    chip.textContent = label;
+    chip.addEventListener('click', () => {
+      if (state.periodFilter === key) return;
+      state.periodFilter = key;
+      const deck = DECKS[state.deck];
+      buildQueue(deck, state.mode);
+      state.index = 0;
+      state.current = null;
+      syncNaalikaControls();
+      render();
+    });
+    periodFilter.appendChild(chip);
+  });
+}
+if (numeralToggle) {
+  numeralToggle.addEventListener('click', () => {
+    clockNumerals = clockNumerals === 'thai' ? 'arabic' : 'thai';
+    try { localStorage.setItem('clockNumerals', clockNumerals); } catch (e) {}
+    syncNaalikaControls();
+    if (state.deck === 'naalika') render();
+  });
+}
+
 // ---- Theme ----
 function applyTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
@@ -576,6 +771,8 @@ function buildModalForBodyParts() {
   modalTitle.innerHTML = 'อวัยวะ <span class="modal-subtitle">All Words</span>';
   modalBanner.hidden = true;
   modalBannerBody.innerHTML = '';
+  const bpHint = document.getElementById('modalHint');
+  if (bpHint) bpHint.hidden = !speechAvailable;
   modalList.innerHTML = '';
   const frag = document.createDocumentFragment();
   const sorted = WORDS.slice().sort((a, b) => a.en.localeCompare(b.en));
@@ -595,6 +792,8 @@ function buildModalForBodyParts() {
 }
 function buildModalForMonths() {
   modalTitle.innerHTML = 'เดือน <span class="modal-subtitle">All Months</span>';
+  const moHint = document.getElementById('modalHint');
+  if (moHint) moHint.hidden = !speechAvailable;
   modalBanner.hidden = false;
   // The "one system, not three tasks" framing from spec § "The learning framing".
   modalBannerBody.innerHTML = `
@@ -625,8 +824,41 @@ function buildModalForMonths() {
   });
   modalList.appendChild(frag);
 }
+function buildModalForNaalika() {
+  modalTitle.innerHTML = 'นาฬิกา <span class="modal-subtitle">Six-Hour Clock</span>';
+  modalBanner.hidden = true;
+  modalBannerBody.innerHTML = '';
+  const hint = document.getElementById('modalHint');
+  if (hint) hint.hidden = true;  // the reference IS the content here
+  let html = '<div class="nl-ref">';
+  PERIOD_ORDER.forEach(key => {
+    const p = PERIODS[key];
+    html += `<div class="nl-ref-row" role="button" aria-label="speak ${p.rom}">
+      <span class="nl-ref-th">${p.th}</span>
+      <span class="nl-ref-range">${p.range}</span>
+      <span class="nl-ref-rule">${p.rule}</span>
+    </div>`;
+  });
+  html += '</div>';
+  html += `<div class="nl-traps">
+    <div class="nl-traps-title">Traps</div>
+    <ul>
+      <li><strong>ทุ่ม</strong> restarts at 7 PM — 7 PM is <em>one</em> ทุ่ม, not seven.</li>
+      <li><strong>บ่าย</strong> (1–3 PM) vs <strong>เย็น</strong> (4–6 PM) split at 4 PM; บ่ายโมง drops the number for 1 PM.</li>
+      <li>โมงเช้า vs โมงเย็น — same โมง, different half of the day.</li>
+      <li>The clock face shows 7; the mouth says หนึ่งทุ่ม. That gap is the whole game.</li>
+    </ul>
+  </div>`;
+  modalList.innerHTML = html;
+  // Tap a period row to hear its bell-word.
+  modalList.querySelectorAll('.nl-ref-row').forEach((row, i) => {
+    const p = PERIODS[PERIOD_ORDER[i]];
+    row.addEventListener('click', () => speakThai(p.th));
+  });
+}
 function openWordList() {
   if (state.deck === 'months') buildModalForMonths();
+  else if (state.deck === 'naalika') buildModalForNaalika();
   else buildModalForBodyParts();
   wordListModal.classList.add('open');
   wordListModal.setAttribute('aria-hidden', 'false');
